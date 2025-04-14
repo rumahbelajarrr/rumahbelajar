@@ -1,5 +1,7 @@
 from django.urls import path
 from . import views
+from django.conf import settings
+from .views import login_guru
 
 urlpatterns = [
     path('absensi/siswa/', views.absensi_siswa, name='absensi_siswa'),
@@ -10,4 +12,6 @@ urlpatterns = [
     path('lihat_absensi_siswa/', views.lihat_absensi_siswa, name='lihat_absensi_siswa'),
     path('lihat_jadwal_guru/', views.lihat_jadwal_guru, name='lihat_jadwal_guru'),
     path('dashboard_admin/', views.dashboard_admin, name='dashboard_admin'),
+    path('', views.home, name='home'),
+
 ]

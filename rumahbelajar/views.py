@@ -1,11 +1,20 @@
 from django.shortcuts import render, redirect
 from .models import Absensi, Siswa, Guru, JadwalLes, OrangTua
 from .forms import AbsensiForm
-from django.contrib.auth.decorators import login_required, group_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 import qrcode
 from django.http import HttpResponse
 from io import BytesIO
 from datetime import date
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
+
+# Dekorator custom
+def group_required(group_name):
+    def in_group(user):
+        return user.is_authenticated and user.groups.filter(name=group_name).exists()
+    return user_passes_test(in_group, login_url='home')  # Redirect kalau gak sesuai grup
 
 @login_required
 @group_required('Siswa')
@@ -95,5 +104,6 @@ def dashboard_admin(request):
         'jadwal': semua_jadwal
     })
 
-
-    
+def home(request):
+    """Halaman Home - Halaman utama aplikasi"""
+    return render(request, 'home.html')  
