@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    {% extends 'base_generic.html' %}
+{% block content %}
+  <h2>Dashboard Admin</h2>
+
+  <h3>Absensi</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Siswa</th>
+        <th>Tanggal</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for absen in absen %}
+        <tr>
+          <td>{{ absen.siswa.nama }}</td>
+          <td>{{ absen.tanggal }}</td>
+          <td>{{ absen.tingkat }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h3>Jadwal Les</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Hari</th>
+        <th>Waktu</th>
+        <th>Guru</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for jadwal in jadwal %}
+        <tr>
+          <td>{{ jadwal.hari }}</td>
+          <td>{{ jadwal.waktu }}</td>
+          <td>{{ jadwal.guru }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
+
+</body>
+</html>

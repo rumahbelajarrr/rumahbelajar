@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    {% block content %}
+      <h2>Jadwal Les</h2>
+    
+      <table>
+        <thead>
+          <tr>
+            <th>Hari</th>
+            <th>Waktu</th>
+            <th>Guru</th>
+            <th>Mata Pelajaran</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for jadwal in jadwal %}
+            <tr>
+              <td>{{ jadwal.hari }}</td>
+              <td>{{ jadwal.waktu }}</td>
+              <td>{{ jadwal.guru }}</td>
+              <td>{{ jadwal.mata_pelajaran }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    
+    {% endblock %}
+    
+</body>
+</html>
