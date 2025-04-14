@@ -6,8 +6,8 @@ import qrcode
 from django.http import HttpResponse
 from io import BytesIO
 from datetime import date
+from django.contrib.auth import authenticate, login,logout
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 
 # Dekorator custom
@@ -103,7 +103,52 @@ def dashboard_admin(request):
         'absen': semua_absen,
         'jadwal': semua_jadwal
     })
+    
+def redirect_dashboard(request):
+    if request.user.groups.filter(name='Admin').exists():
+        return redirect('dashboard_admin')
+    elif request.user.groups.filter(name='Guru').exists():
+        return redirect('dashboard_guru')
+    elif request.user.groups.filter(name='Siswa').exists():
+        return redirect('dashboard_Siswa')
+    elif request.user.groups.filter(name='OrangTua').exists():
+        return redirect('dashboard_OrangTua')
+    else:
+        return redirect('home')  # Jika role tidak terdaftar
+ 
+@login_required
+@group_required('Guru')   
+def dashboard_guru(request):
+    return render(request, 'guru/dashboard_guru.html')
+
+@login_required
+@group_required('Siswa')
+def dashboard_siswa(request):
+    return render(request, 'siswa/dashboard_Siswa.html')
+
+@login_required
+@group_required('OrangTua')
+def dashboard_orangtua(request):
+    return render(request, 'orangtua/dashboard_OrangTua.html')
+
 
 def home(request):
     """Halaman Home - Halaman utama aplikasi"""
-    return render(request, 'home.html')  
+    return render(request, 'absensi/home.html')  
+
+def logout_view(request):
+    logout(request)
+    return redirect('home') 
+
+
+def login_view(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return redirect('redirect_dashboard')  # Ganti ke halaman utama lo
+        else:
+            messages.error(request, 'Username atau password salah!')
+    return render(request, 'absensi/login.html')  # Pastikan ada template login.html

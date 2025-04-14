@@ -1,0 +1,10 @@
+
+{% block content %}
+<h2>Dashboard Guru</h2>
+<div class="card">
+  <p>Selamat datang, {{ request.user.username }}!</p>
+  <p><a href="{% url 'absen_guru' %}">Absen Hari Ini</a></p>
+  <p><a href="{% url 'lihat_absensi_siswa' %}">Lihat Absensi Siswa</a></p>
+  <p><a href="{% url 'lihat_jadwal_guru' %}">Lihat Jadwal Mengajar</a></p>
+</div>
+{% endblock %}

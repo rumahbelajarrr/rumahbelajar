@@ -1,0 +1,13 @@
+
+{% block content %}
+<h2>Dashboard Orang Tua</h2>
+<div class="card">
+  <p>Selamat datang, {{ request.user.username }}!</p>
+  <p>Berikut adalah informasi absensi anak Anda:</p>
+  <ul>
+    {% for ab in absensi %}
+      <li>{{ ab.siswa.nama }} - {{ ab.tanggal }} - {{ ab.status }}</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}
