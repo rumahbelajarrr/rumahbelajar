@@ -64,3 +64,6 @@ class Absensi(models.Model):
         elif self.guru:
             return f"Absensi Guru - {self.guru.nama} - {self.tanggal}"
         return "Absensi Tidak Lengkap"
+
+
+
