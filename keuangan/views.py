@@ -5,8 +5,11 @@ from django.contrib.auth import authenticate, login,logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import HttpResponse
 from .forms import BuktiPembayaranForm
+from .models import Siswa as SiswaKeuangan
 import openpyxl  # Add this import
 from io import BytesIO
+
+
 
 
 
@@ -167,18 +170,14 @@ def export_pembayaran_excel(request):
     
 
 @login_required
-def lihat_data_orangtua(request):
-    # Ambil user yang sedang login (OrangTua)
-    orang_tua = request.user.orangtua  # Asumsikan user punya relasi OneToOne ke OrangTua
+def tagihan_orangtua(request):
+    print(request.user) 
+    # Ambil data orang tua yang login
+    orang_tua = request.user.keuangan_orangtua
+    siswa = SiswaKeuangan.objects.filter(orang_tua=orang_tua)
 
-    # Ambil semua siswa (anak) yang terkait dengan orang tua ini
-    anak_list = orang_tua.anak.all()
-
-    absen_list = Absensi.objects.filter(siswa__in=anak_list)
-    pembayaran_list = PembayaranSPP.objects.filter(siswa__in=anak_list)
-
-    return render(request, 'keuangan/orangtua/lihat_data.html', {
-        'absen_list': absen_list,
-        'pembayaran_list': pembayaran_list,
-        'anak_list': anak_list,
-    })
+    # Kirim data tagihan SPP ke template
+    context = {
+        'siswa': siswa,
+    }
+    return render(request, 'keuangan/orangtua/tagihan_orangtua.html', context)

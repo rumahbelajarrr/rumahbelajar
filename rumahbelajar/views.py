@@ -4,6 +4,7 @@ from .forms import AbsensiForm
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, redirect, get_object_or_404
 import qrcode
+from keuangan.models import Siswa as SiswaKeuangan
 from django.http import HttpResponse
 from io import BytesIO
 from datetime import date
@@ -130,9 +131,23 @@ def dashboard_siswa(request):
     return render(request, 'siswa/dashboard_Siswa.html')
 
 @login_required
-@group_required('OrangTua')
 def dashboard_orangtua(request):
-    return render(request, 'orangtua/dashboard_OrangTua.html')
+    try:
+        orang_tua = request.user.rumahbelajar_orangtua
+        siswa = Siswa.objects.filter(orang_tua=orang_tua)
+
+        context = {
+            'orang_tua': orang_tua,
+            'siswa': siswa,
+        }
+
+        return render(request, 'orangtua/dashboard_orangtua.html', context)
+
+    
+    except OrangTua.DoesNotExist:
+        # Jika user tidak ditemukan sebagai orang tua
+        return render(request, 'rumahbelajar/home.html')
+
 
 
 def home(request):
@@ -158,3 +173,15 @@ def login_view(request):
 
 
 
+
+@login_required
+def absensi_orangtua(request):
+    # Ambil data orang tua yang login
+    orang_tua = request.user.rumahbelajar_orangtua
+    siswa = Siswa.objects.filter(orang_tua=orang_tua)
+
+    # Kirim data absensi ke template
+    context = {
+        'siswa': siswa,
+    }
+    return render(request, 'rumahbelaja r/absensi_orangtua.html', context)
