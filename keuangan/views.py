@@ -72,7 +72,6 @@ def tagihan_spp(request):
 
 @login_required
 def kelola_pembayaran(request):
-    # Ambil daftar semua kelas unik
     kelas_list = Siswa.objects.values_list('kelas', flat=True).distinct()
 
     kelas_terpilih = request.GET.get('kelas')
@@ -84,7 +83,7 @@ def kelola_pembayaran(request):
         pembayaran_list = pembayaran_list.filter(siswa__kelas=kelas_terpilih)
 
     if search_nama:
-        pembayaran_list = pembayaran_list.filter(siswa_nama_icontains=search_nama)
+        pembayaran_list = pembayaran_list.filter(siswa__nama__icontains=search_nama)
 
     pembayaran_list = pembayaran_list.order_by('siswa__nama', 'bulan')
 
@@ -95,13 +94,15 @@ def kelola_pembayaran(request):
         pembayaran.status_bayar = 'lunas'
         pembayaran.save()
 
+        query_params = []
+        if kelas_terpilih:
+            query_params.append(f'kelas={kelas_terpilih}')
+        if search_nama:
+            query_params.append(f'search_nama={search_nama}')
+        
         redirect_url = request.path
-        if kelas_terpilih or search_nama:
-            redirect_url += '?'
-            if kelas_terpilih:
-                redirect_url += f'kelas={kelas_terpilih}&'
-            if search_nama:
-                redirect_url += f'search_nama={search_nama}'
+        if query_params:
+            redirect_url += '?' + '&'.join(query_params)
 
         return redirect(redirect_url)
 
@@ -113,6 +114,12 @@ def kelola_pembayaran(request):
     })
 
 
+
+from django.http import HttpResponse
+from io import BytesIO
+import openpyxl
+from .models import PembayaranSPP  # Pastikan import model ini juga
+
 def export_pembayaran_excel(request):
     # Create a new workbook and select the active worksheet
     wb = openpyxl.Workbook()
@@ -122,20 +129,26 @@ def export_pembayaran_excel(request):
     # Header Row
     ws.append(['Nama Siswa', 'Kelas', 'Bulan', 'Jumlah Bayar', 'Status', 'Tanggal Bayar'])
 
-    # Filter PembayaranSPP based on query parameters (kelas and search_nama)
- 
+    # Filter berdasarkan query params
+    kelas = request.GET.get('kelas')
+    search_nama = request.GET.get('search_nama')
 
-    # Start filtering PembayaranSPP
     pembayaran_list = PembayaranSPP.objects.all().order_by('siswa__nama')
+
+    if kelas:
+        pembayaran_list = pembayaran_list.filter(siswa__kelas=kelas)
+    if search_nama:
+        pembayaran_list = pembayaran_list.filter(siswa__nama__icontains=search_nama)
+
     # Adding data rows
     for bayar in pembayaran_list:
         ws.append([
-            bayar.siswa.nama,  # Siswa Name
-            bayar.siswa.kelas,  # Kelas
-            bayar.get_bulan_display(),  # Month using get_bulan_display
-            bayar.jumlah_bayar,  # Amount Paid
-            bayar.status_bayar,  # Payment Status
-            bayar.tanggal_bayar.strftime("%d-%m-%Y") if bayar.tanggal_bayar else '-',  # Payment Date
+            bayar.siswa.nama,
+            bayar.siswa.kelas,
+            bayar.get_bulan_display(),  # Gunakan get_bulan_display() untuk tampilkan bulan dengan nama
+            bayar.jumlah_bayar,
+            bayar.status_bayar,
+            bayar.tanggal_bayar.strftime("%d-%m-%Y") if bayar.tanggal_bayar else '-',  
         ])
 
     # Save workbook to memory (using BytesIO)
@@ -150,4 +163,5 @@ def export_pembayaran_excel(request):
     )
     response['Content-Disposition'] = 'attachment; filename=pembayaran_spp.xlsx'
     return response
+
     
