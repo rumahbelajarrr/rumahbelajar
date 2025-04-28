@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 
 # Model untuk siswa
 class Siswa(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='keuangan_siswa')
     nama = models.CharField(max_length=100)
     nis = models.CharField(max_length=20, unique=True)
     kelas = models.CharField(max_length=10)
@@ -54,3 +55,36 @@ class RekapitulasiKeuangan(models.Model):
 
     def __str__(self):
         return f"Rekap {self.bulan.strftime('%B %Y')}"
+    
+    
+
+
+class PembayaranSPP(models.Model):
+    BULAN_CHOICES = [
+    ('01', 'Januari'),
+    ('02', 'Februari'),
+    ('03', 'Maret'),
+    ('04', 'April'),
+    ('05', 'Mei'),
+    ('06', 'Juni'),
+    ('07', 'Juli'),
+    ('08', 'Agustus'),
+    ('09', 'September'),
+    ('10', 'Oktober'),
+    ('11', 'November'),
+    ('12', 'Desember'),
+
+]
+    STATUS_CHOICES = [
+    ('belum lunas', 'Belum Lunas'),
+    ('lunas', 'Lunas'),
+]
+    siswa = models.ForeignKey(Siswa, on_delete=models.CASCADE)
+    bulan = models.CharField(max_length=2, choices=BULAN_CHOICES)
+    jumlah_bayar = models.DecimalField(max_digits=10, decimal_places=2)
+    status_bayar = models.CharField(max_length=20, choices=STATUS_CHOICES, default='belum lunas')
+    tanggal_bayar = models.DateField(auto_now_add=True)
+    bukti_pembayaran = models.ImageField(upload_to='bukti_pembayaran/', blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.siswa.nama} - {self.get_bulan_display()} - {self.status_bayar}"

@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 from django.conf import settings
 
+app_name = 'rumahbelajar'
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -19,5 +20,5 @@ urlpatterns = [
     path('dashboard/guru/', views.dashboard_guru, name='dashboard_guru'),
     path('dashboard/siswa/', views.dashboard_siswa, name='dashboard_Siswa'),
     path('dashboard/OrangTua/', views.dashboard_orangtua, name='dashboard_OrangTua'),
-
+ 
 ]

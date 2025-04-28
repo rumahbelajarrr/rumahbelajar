@@ -6,4 +6,5 @@ class AbsensiForm(forms.ModelForm):
     class Meta:
         model = Absensi
         fields = ['siswa', 'guru', 'status', 'metode_absensi']
+    
 

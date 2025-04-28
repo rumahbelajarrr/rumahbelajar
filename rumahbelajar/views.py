@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from .models import Absensi, Siswa, Guru, JadwalLes, OrangTua
 from .forms import AbsensiForm
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.shortcuts import render, redirect, get_object_or_404
 import qrcode
 from django.http import HttpResponse
 from io import BytesIO
@@ -9,6 +10,8 @@ from datetime import date
 from django.contrib.auth import authenticate, login,logout
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
+
+
 
 # Dekorator custom
 def group_required(group_name):
@@ -106,13 +109,13 @@ def dashboard_admin(request):
     
 def redirect_dashboard(request):
     if request.user.groups.filter(name='Admin').exists():
-        return redirect('dashboard_admin')
+        return redirect('rumahbelajar:dashboard_admin')
     elif request.user.groups.filter(name='Guru').exists():
-        return redirect('dashboard_guru')
+        return redirect('rumahbelajar:dashboard_guru')
     elif request.user.groups.filter(name='Siswa').exists():
-        return redirect('dashboard_Siswa')
+        return redirect('rumahbelajar:dashboard_Siswa')
     elif request.user.groups.filter(name='OrangTua').exists():
-        return redirect('dashboard_OrangTua')
+        return redirect('rumahbelajar:dashboard_OrangTua')
     else:
         return redirect('home')  # Jika role tidak terdaftar
  
@@ -148,7 +151,8 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect('redirect_dashboard')  # Ganti ke halaman utama lo
+            return redirect('rumahbelajar:redirect_dashboard')  # Ganti ke halaman utama lo
         else:
             messages.error(request, 'Username atau password salah!')
     return render(request, 'absensi/login.html')  # Pastikan ada template login.html
+

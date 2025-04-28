@@ -3,7 +3,9 @@
 <h2>Dashboard Siswa</h2>
 <div class="card">
   <p>Hai, {{ request.user.username }}!</p>
-  <p><a href="{% url 'absensi_siswa' %}">Isi Absensi</a></p>
-  <p><a href="{% url 'lihat_absensi_sendiri' %}">Lihat Riwayat Absensi</a></p>
+  <p><a href="{% url 'rumahbelajar:absensi_siswa' %}">Isi Absensi</a></p>
+  <p><a href="{% url 'rumahbelajar:lihat_absensi_sendiri' %}">Lihat Riwayat Absensi</a></p>
+  <p><a href="{% url 'keuangan:tagihan_spp' %}">TAGIHAN SISWA</a></p>
+
 </div>
 {% endblock %}

@@ -1,6 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+
+
+
 class OrangTua(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     nama = models.CharField(max_length=100)
@@ -12,7 +15,7 @@ class OrangTua(models.Model):
 
 
 class Siswa(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='rumahbelajar_siswa')
     nama = models.CharField(max_length=100)
     tanggal_lahir = models.DateField()
     jenis_kelamin = models.CharField(max_length=10)
@@ -64,6 +67,4 @@ class Absensi(models.Model):
         elif self.guru:
             return f"Absensi Guru - {self.guru.nama} - {self.tanggal}"
         return "Absensi Tidak Lengkap"
-
-
 

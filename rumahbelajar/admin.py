@@ -27,3 +27,4 @@ class AbsensiAdmin(admin.ModelAdmin):
     list_display = ['tanggal', 'siswa', 'guru', 'status', 'metode_absensi']
     list_filter = ['status', 'metode_absensi', 'tanggal']
     search_fields = ['siswa__nama', 'guru__nama']
+    
