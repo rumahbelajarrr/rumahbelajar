@@ -165,3 +165,20 @@ def export_pembayaran_excel(request):
     return response
 
     
+
+@login_required
+def lihat_data_orangtua(request):
+    # Ambil user yang sedang login (OrangTua)
+    orang_tua = request.user.orangtua  # Asumsikan user punya relasi OneToOne ke OrangTua
+
+    # Ambil semua siswa (anak) yang terkait dengan orang tua ini
+    anak_list = orang_tua.anak.all()
+
+    absen_list = Absensi.objects.filter(siswa__in=anak_list)
+    pembayaran_list = PembayaranSPP.objects.filter(siswa__in=anak_list)
+
+    return render(request, 'keuangan/orangtua/lihat_data.html', {
+        'absen_list': absen_list,
+        'pembayaran_list': pembayaran_list,
+        'anak_list': anak_list,
+    })
