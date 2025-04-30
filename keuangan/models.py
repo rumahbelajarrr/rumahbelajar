@@ -75,6 +75,7 @@ class PembayaranSPP(models.Model):
     ('12', 'Desember'),
 
 ]
+    
     STATUS_CHOICES = [
     ('belum lunas', 'Belum Lunas'),
     ('lunas', 'Lunas'),

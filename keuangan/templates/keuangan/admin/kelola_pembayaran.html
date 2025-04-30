@@ -83,6 +83,12 @@
             transition: 0.3s;
         }
 
+        td select {
+            padding: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -106,15 +112,13 @@
             <option value="{{ kelas }}" {% if kelas == kelas_terpilih %}selected{% endif %}>{{ kelas }}</option>
         {% endfor %}
     </select>
-    
+
     {% if kelas_terpilih %}
     <input type="text" name="search_nama" placeholder="Cari Nama Siswa..." value="{{ search_nama }}" style="margin-left: 10px; padding: 8px; border-radius: 5px; border: none;">
     <button type="submit">Cari</button>
     <a href="{% url 'kelola_pembayaran' %}" class="reset-link">Reset Filter</a>
     {% endif %}
 </form>
-
-
 
 {% if kelas_terpilih %}
     <h3>Kelas: {{ kelas_terpilih }}</h3>
@@ -148,15 +152,15 @@
                 {% endif %}
             </td>
             <td>
-                {% if bayar.status_bayar == 'belum lunas' %}
                 <form method="POST">
                     {% csrf_token %}
                     <input type="hidden" name="pembayaran_id" value="{{ bayar.id }}">
-                    <button type="submit">Tandai Lunas</button>
+                    <select name="status_baru">
+                        <option value="belum lunas" {% if bayar.status_bayar == 'belum lunas' %}selected{% endif %}>Belum Lunas</option>
+                        <option value="lunas" {% if bayar.status_bayar == 'lunas' %}selected{% endif %}>Lunas</option>
+                    </select>
+                    <button type="submit" style="margin-top: 5px;">Ubah</button>
                 </form>
-                {% else %}
-                    ✅ Lunas
-                {% endif %}
             </td>
         </tr>
         {% empty %}
