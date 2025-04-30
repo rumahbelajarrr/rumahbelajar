@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from keuangan.models import PembayaranSPP,Siswa, Pemasukan, Pengeluaran, Tagihan, RekapitulasiKeuangan
+from keuangan.models import PembayaranSPP,Siswa, Pemasukan, Pengeluaran, Tagihan, RekapitulasiKeuangan,OrangTua
 
 @admin.register(Siswa)
 class SiswaAdmin(admin.ModelAdmin):
@@ -38,3 +38,9 @@ class PembayaranSPPAdmin(admin.ModelAdmin):
     search_fields = ('siswa__nama', 'bulan')
     list_editable = ('status_bayar',)
 
+
+@admin.register(OrangTua)
+class OrangTuaAdmin(admin.ModelAdmin):
+    list_display = ('nama', 'user', 'alamat', 'no_telp')
+    search_fields = ('nama', 'user__username', 'no_telp')
+    list_filter = ('alamat',)

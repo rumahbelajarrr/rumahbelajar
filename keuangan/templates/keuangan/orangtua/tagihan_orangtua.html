@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tagihan Orang Tua</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Tagihan untuk {{ orang_tua.nama }}</h1>
+        <h3>Daftar Tagihan SPP dan Lainnya</h3>
+
+        <div class="mt-4">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Deskripsi</th>
+                        <th>Jumlah</th>
+                        <th>Status Pembayaran</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tagihan in tagihan %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ tagihan.deskripsi }}</td>
+                            <td>Rp{{ tagihan.jumlah }}</td>
+                            <td>
+                                {% if tagihan.is_paid %}
+                                    <span class="badge bg-success">Lunas</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Belum Lunas</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center">Tidak ada tagihan</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mt-4">
+            <h5>Total Tagihan: Rp{{ total_tagihan }}</h5>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

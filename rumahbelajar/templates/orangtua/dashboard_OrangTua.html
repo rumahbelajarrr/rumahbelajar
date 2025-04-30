@@ -1,13 +1,60 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Orang Tua</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Selamat datang, {{ request.user.first_name }}!</h1>
+        <h3>Dashboard Orang Tua</h3>
 
-{% block content %}
-<h2>Dashboard Orang Tua</h2>
-<div class="card">
-  <p>Selamat datang, {{ request.user.username }}!</p>
-  <p>Berikut adalah informasi absensi anak Anda:</p>
-  <ul>
-    {% for ab in absensi %}
-      <li>{{ ab.siswa.nama }} - {{ ab.tanggal }} - {{ ab.status }}</li>
-    {% endfor %}
-  </ul>
-</div>
-{% endblock %}
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Anak-Anak Anda</h5>
+                        <ul>
+                            {% for siswa in siswa %}
+                                <li>{{ siswa.nama }} ({{ siswa.kelas }})</li>
+                            {% empty %}
+                                <li>Tidak ada data siswa</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Tagihan Terbaru</h5>
+                        <ul>
+                            {% for tagihan in tagihan %}
+                                <li>{{ tagihan.deskripsi }} - Rp{{ tagihan.jumlah }}</li>
+                            {% empty %}
+                                <li>Tidak ada tagihan saat ini</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Informasi Akun</h5>
+                        <p><strong>Nama:</strong> {{ orang_tua.nama }}</p>
+                        <p><strong>Alamat:</strong> {{ orang_tua.alamat }}</p>
+                        <p><strong>Telepon:</strong> {{ orang_tua.no_telp }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

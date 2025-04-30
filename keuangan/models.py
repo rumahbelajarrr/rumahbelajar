@@ -2,11 +2,24 @@ from django.db import models
 from django.contrib.auth.models import User
 
 # Model untuk siswa
+
+class OrangTua(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='keuangan_orangtua')
+    nama = models.CharField(max_length=100)
+    alamat = models.TextField()
+    no_telp = models.CharField(max_length=15)
+
+    def __str__(self):
+        return self.nama
+
+
+
 class Siswa(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='keuangan_siswa')
     nama = models.CharField(max_length=100)
     nis = models.CharField(max_length=20, unique=True)
     kelas = models.CharField(max_length=10)
+    orang_tua = models.ForeignKey(OrangTua, on_delete=models.CASCADE, related_name='anak')
 
     def __str__(self):
         return f"{self.nama} ({self.nis})"

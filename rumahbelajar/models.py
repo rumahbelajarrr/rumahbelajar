@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 
 
 class OrangTua(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='rumahbelajar_orangtua')
     nama = models.CharField(max_length=100)
     alamat = models.TextField()
     no_telp = models.CharField(max_length=15)
