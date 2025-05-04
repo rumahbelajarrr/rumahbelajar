@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kelola Pembayaran SPP</title>
     <style>
-        /* (CSS kamu tetap sama, aku tidak ubah) */
+        /* === GLOBAL STYLE === */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(to right, #00c6ff, #0072ff);
@@ -68,8 +68,43 @@
             background-color: #138496;
         }
 
+        /* === SIDEBAR === */
+        .sidebar {
+            width: 220px;
+            background-color: #2c3e50;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem 1rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+        }
+
+        .sidebar h2 {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .sidebar a {
+            color: white;
+            text-decoration: none;
+            margin: 0.5rem 0;
+            padding: 0.5rem;
+            border-radius: 4px;
+            display: block;
+        }
+
+        .sidebar a:hover {
+            background-color: #34495e;
+        }
+
+        /* === TABLE === */
         table {
             width: 100%;
+            margin-left: 10px;
             border-collapse: collapse;
             background-color: white;
             border-radius: 10px;
@@ -100,6 +135,7 @@
             border: 1px solid #ccc;
         }
 
+        /* === ANIMATION === */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -113,75 +149,89 @@
 </head>
 <body>
 
-<h2>Kelola Pembayaran SPP</h2>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h2>Admin Panel</h2>
+        <a href="{% url 'keuangan:beranda' %}">Dashboard</a>
+        <a href="{% url 'keuangan:daftar_siswa' %}">Daftar Siswa</a>
+        <a href="{% url 'keuangan:daftar_pemasukan' %}">Pemasukan</a>
+        <a href="{% url 'keuangan:daftar_pengeluaran' %}">Pengeluaran</a>
+        <a href="{% url 'keuangan:rekap_keuangan' %}">Rekap Keuangan</a>
+        <a href="{% url 'keuangan:kelola_pembayaran' %}">Kelola Pembayaran</a>
+    </div>
 
-<form method="GET">
-    <label for="kelas" style="color: white; font-size: 18px;">Pilih Kelas:</label>
-    <select name="kelas" id="kelas" onchange="this.form.submit()">
-        <option value="">-- Pilih Kelas --</option>
-        {% for kelas in kelas_list %}
-            <option value="{{ kelas }}" {% if kelas == kelas_terpilih %}selected{% endif %}>{{ kelas }}</option>
-        {% endfor %}
-    </select>
+    <!-- Konten -->
+    <div style="margin-left: 240px;">
+        <h2>Kelola Pembayaran SPP</h2>
 
-    {% if kelas_terpilih %}
-    <input type="text" name="search_nama" placeholder="Cari Nama Siswa..." value="{{ search_nama }}" style="margin-left: 10px; padding: 8px; border-radius: 5px; border: none;">
-    <button type="submit">Cari</button>
-    <a href="{% url 'keuangan:kelola_pembayaran' %}" class="reset-link">Reset Filter</a>
-    <a href="{% url 'keuangan:export_pembayaran_excel' %}" class="export-link">Export Excel</a> <!-- tombol baru -->
-    {% endif %}
-</form>
+        <form method="GET">
+            <label for="kelas" style="color: white; font-size: 18px;">Pilih Kelas:</label>
+            <select name="kelas" id="kelas" onchange="this.form.submit()">
+                <option value="">-- Pilih Kelas --</option>
+                {% for kelas in kelas_list %}
+                    <option value="{{ kelas }}" {% if kelas == kelas_terpilih %}selected{% endif %}>{{ kelas }}</option>
+                {% endfor %}
+            </select>
 
-{% if kelas_terpilih %}
-    <h3>Kelas: {{ kelas_terpilih }}</h3>
-{% endif %}
+            {% if kelas_terpilih %}
+                <input type="text" name="search_nama" placeholder="Cari Nama Siswa..." value="{{ search_nama }}">
+                <button type="submit">Cari</button>
+                <a href="{% url 'keuangan:kelola_pembayaran' %}" class="reset-link">Reset Filter</a>
+                <a href="{% url 'keuangan:export_pembayaran_excel' %}" class="export-link">Export Excel</a>
+            {% endif %}
+        </form>
 
-<table>
-    <thead>
-        <tr>
-            <th>Nama Siswa</th>
-            <th>Bulan</th>
-            <th>Jumlah</th>
-            <th>Status</th>
-            <th>Tanggal Bayar</th>
-            <th>Bukti</th>
-            <th>Aksi</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for bayar in pembayaran_list %}
-        <tr>
-            <td>{{ bayar.siswa.nama }}</td>
-            <td>{{ bayar.get_bulan_display }}</td>
-            <td>Rp{{ bayar.jumlah_bayar }}</td>
-            <td>{{ bayar.status_bayar }}</td>
-            <td>{{ bayar.tanggal_bayar|default:"-" }}</td>
-            <td>
-                {% if bayar.bukti_pembayaran %}
-                    <a href="{{ bayar.bukti_pembayaran.url }}" target="_blank">Lihat</a>
-                {% else %}
-                    Belum Ada
-                {% endif %}
-            </td>
-            <td>
-                <form method="POST">
-                    {% csrf_token %}
-                    <input type="hidden" name="pembayaran_id" value="{{ bayar.id }}">
-                    <select name="status_baru">
-                        <option value="belum lunas" {% if bayar.status_bayar == 'belum lunas' %}selected{% endif %}>Belum Lunas</option>
-                        <option value="lunas" {% if bayar.status_bayar == 'lunas' %}selected{% endif %}>Lunas</option>
-                    </select>
-                    <button type="submit" style="margin-top: 5px;">Ubah</button>
-                </form>
-            </td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="7" style="text-align: center;">Tidak ada data pembayaran.</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+        {% if kelas_terpilih %}
+            <h3>Kelas: {{ kelas_terpilih }}</h3>
+        {% endif %}
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Nama Siswa</th>
+                    <th>Bulan</th>
+                    <th>Jumlah</th>
+                    <th>Status</th>
+                    <th>Tanggal Bayar</th>
+                    <th>Bukti</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for bayar in pembayaran_list %}
+                    <tr>
+                        <td>{{ bayar.siswa.nama }}</td>
+                        <td>{{ bayar.get_bulan_display }}</td>
+                        <td>Rp{{ bayar.jumlah_bayar }}</td>
+                        <td>{{ bayar.status_bayar }}</td>
+                        <td>{{ bayar.tanggal_bayar|default:"-" }}</td>
+                        <td>
+                            {% if bayar.bukti_pembayaran %}
+                                <a href="{{ bayar.bukti_pembayaran.url }}" target="_blank">Lihat</a>
+                            {% else %}
+                                Belum Ada
+                            {% endif %}
+                        </td>
+                        <td>
+                            <form method="POST">
+                                {% csrf_token %}
+                                <input type="hidden" name="pembayaran_id" value="{{ bayar.id }}">
+                                <select name="status_baru">
+                                    <option value="belum lunas" {% if bayar.status_bayar == 'belum lunas' %}selected{% endif %}>Belum Lunas</option>
+                                    <option value="lunas" {% if bayar.status_bayar == 'lunas' %}selected{% endif %}>Lunas</option>
+                                </select>
+                                <button type="submit" style="margin-top: 5px;">Ubah</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="7" style="text-align: center;">Tidak ada data pembayaran.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
 </body>
 </html>

@@ -4,48 +4,106 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Orang Tua</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f5f7fa;
+        }
+        .card {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        h1, h3 {
+            color: #343a40;
+        }
+        .table td, .table th {
+            vertical-align: middle;
+        }
+    </style>
 </head>
 <body>
     <div class="container mt-5">
-        <h1>Selamat datang, {{ request.user.first_name }}!</h1>
-        <h3>Dashboard Orang Tua</h3>
+        <h1 class="mb-3">Selamat datang, {{ request.user.first_name }}!</h1>
+        <h3 class="mb-4">Dashboard Orang Tua</h3>
 
-        <div class="row mt-4">
+        <div class="row">
+            <!-- Anak-anak -->
             <div class="col-md-4">
-                <div class="card">
+                <div class="card p-3">
                     <div class="card-body">
-                        <h5 class="card-title">Anak-Anak Anda</h5>
-                        <ul>
+                        <h5 class="card-title mb-3">Anak-Anak Anda</h5>
+                        <ul class="list-group list-group-flush">
                             {% for siswa in siswa %}
-                                <li>{{ siswa.nama }} ({{ siswa.kelas }})</li>
+                                <li class="list-group-item">{{ siswa.nama }} ({{ siswa.kelas }})</li>
                             {% empty %}
-                                <li>Tidak ada data siswa</li>
+                                <li class="list-group-item text-muted">Tidak ada data siswa</li>
                             {% endfor %}
                         </ul>
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-4">
-                <div class="card">
+            <!-- Tagihan -->
+            <div class="col-md-8">
+                <div class="card p-3">
                     <div class="card-body">
-                        <h5 class="card-title">Tagihan Terbaru</h5>
-                        <ul>
-                            {% for tagihan in tagihan %}
-                                <li>{{ tagihan.deskripsi }} - Rp{{ tagihan.jumlah }}</li>
-                            {% empty %}
-                                <li>Tidak ada tagihan saat ini</li>
-                            {% endfor %}
-                        </ul>
+                        <h5 class="card-title mb-3">Tagihan Terbaru</h5>
+                        
+                        {% if tagihan %}
+                        <div class="table-responsive">
+                            <table class="table table-striped table-bordered">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Bulan</th>
+                                        <th>Jumlah</th>
+                                        <th>Bukti Pembayaran</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for bayar in tagihan %}
+                                    <tr>
+                                        <td>{{ forloop.counter }}</td>
+                                        <td>{{ bayar.bulan }}</td>
+                                        <td>Rp{{ bayar.jumlah_bayar }}</td>
+                                        <td>
+                                            {% if bayar.bukti_pembayaran %}
+                                                <a href="{{ bayar.bukti_pembayaran.url }}" class="btn btn-sm btn-outline-primary" target="_blank">Lihat</a>
+                                            {% else %}
+                                                <span class="text-muted">Belum Ada</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if bayar.status_bayar == 'belum lunas' %}
+                                            <form method="POST" enctype="multipart/form-data" class="d-flex flex-column gap-2">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="pembayaran_id" value="{{ bayar.id }}">
+                                                {{ form.bukti_pembayaran }}
+                                                <button type="submit" class="btn btn-sm btn-success">Upload</button>
+                                            </form>
+                                            {% else %}
+                                                <span class="badge bg-success">Lunas</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                            <p class="text-muted">Belum ada data tagihan.</p>
+                        {% endif %}
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-4">
-                <div class="card">
+            <!-- Info Akun -->
+            <div class="col-md-12 mt-4">
+                <div class="card p-3">
                     <div class="card-body">
-                        <h5 class="card-title">Informasi Akun</h5>
+                        <h5 class="card-title mb-3">Informasi Akun</h5>
                         <p><strong>Nama:</strong> {{ orang_tua.nama }}</p>
                         <p><strong>Alamat:</strong> {{ orang_tua.alamat }}</p>
                         <p><strong>Telepon:</strong> {{ orang_tua.no_telp }}</p>

@@ -11,7 +11,9 @@ from datetime import date
 from django.contrib.auth import authenticate, login,logout
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
-
+from keuangan.models import PembayaranSPP, Siswa, OrangTua
+from keuangan.forms import BuktiPembayaranForm
+ 
 
 
 # Dekorator custom
@@ -133,9 +135,9 @@ def dashboard_siswa(request):
 @login_required
 def dashboard_orangtua(request):
     try:
-        orang_tua = request.user.rumahbelajar_orangtua
+        orang_tua = request.user.keuangan_orangtua
         siswa = Siswa.objects.filter(orang_tua=orang_tua)
-
+        PembayaranSPP = PembayaranSPP.objects.filter(siswa__in=siswa)
         context = {
             'orang_tua': orang_tua,
             'siswa': siswa,
@@ -146,7 +148,7 @@ def dashboard_orangtua(request):
     
     except OrangTua.DoesNotExist:
         # Jika user tidak ditemukan sebagai orang tua
-        return render(request, 'rumahbelajar/home.html')
+        return render(request, 'absensi/home.html')
 
 
 
@@ -175,13 +177,20 @@ def login_view(request):
 
 
 @login_required
-def absensi_orangtua(request):
-    # Ambil data orang tua yang login
-    orang_tua = request.user.rumahbelajar_orangtua
-    siswa = Siswa.objects.filter(orang_tua=orang_tua)
+def dashboard_orangtua(request):
+    try:
+        orang_tua = request.user.keuangan_orangtua  # atau tergantung related_name-nya
+        siswa_list = Siswa.objects.filter(orang_tua=orang_tua)
+        tagihan_list = PembayaranSPP.objects.filter(siswa__in=siswa_list)
 
-    # Kirim data absensi ke template
-    context = {
-        'siswa': siswa,
-    }
-    return render(request, 'rumahbelaja r/absensi_orangtua.html', context)
+        context = {
+            'orang_tua': orang_tua,
+            'siswa': siswa_list,
+            'tagihan': tagihan_list,
+            'form': BuktiPembayaranForm(),  # kalau pakai form bukti pembayaran
+        }
+
+        return render(request, 'orangtua/dashboard_orangtua.html', context)
+
+    except OrangTua.DoesNotExist:
+        return redirect('home')  # atau halaman error lain

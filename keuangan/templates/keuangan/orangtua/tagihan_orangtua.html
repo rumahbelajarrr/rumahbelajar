@@ -15,26 +15,26 @@
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th>#</th>
-                        <th>Deskripsi</th>
-                        <th>Jumlah</th>
-                        <th>Status Pembayaran</th>
+                        <th>Nama Siswa</th>
+<th>Deskripsi (Bulan)</th>
+<th>Jumlah</th>
+<th>Status Pembayaran</th>
+
                     </tr>
                 </thead>
                 <tbody>
                     {% for tagihan in tagihan %}
-                        <tr>
-                            <td>{{ forloop.counter }}</td>
-                            <td>{{ tagihan.deskripsi }}</td>
-                            <td>Rp{{ tagihan.jumlah }}</td>
-                            <td>
-                                {% if tagihan.is_paid %}
-                                    <span class="badge bg-success">Lunas</span>
-                                {% else %}
-                                    <span class="badge bg-danger">Belum Lunas</span>
-                                {% endif %}
-                            </td>
-                        </tr>
+                    <td>{{ tagihan.siswa.nama }}</td>
+                    <td>{{ tagihan.get_bulan_display }}</td>
+                    <td>Rp{{ tagihan.jumlah_bayar }}</td>
+                    <td>
+                        {% if tagihan.status_bayar == 'lunas' %}
+                            <span class="badge bg-success">Lunas</span>
+                        {% else %}
+                            <span class="badge bg-danger">Belum Lunas</span>
+                        {% endif %}
+                    </td>
+                    
                     {% empty %}
                         <tr>
                             <td colspan="4" class="text-center">Tidak ada tagihan</td>
