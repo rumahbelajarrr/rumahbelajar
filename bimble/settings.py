@@ -56,7 +56,7 @@ ROOT_URLCONF = 'bimble.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],  # ⬅️ ini wajib ditambah
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

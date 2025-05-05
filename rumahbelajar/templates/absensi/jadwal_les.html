@@ -1,36 +1,134 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Jadwal Les</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f5f8fc;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            background-color: #1976d2;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            background: #fff;
+            padding: 20px 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .controls select, .controls button {
+            padding: 10px 16px;
+            font-size: 14px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        .controls button {
+            cursor: pointer;
+        }
+        .controls .btn-green {
+            background-color: #4caf50;
+            color: white;
+            border: none;
+        }
+        .controls .btn-blue {
+            background-color: #2196f3;
+            color: white;
+            border: none;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        thead {
+            background-color: #e3f2fd;
+        }
+        th, td {
+            padding: 12px 10px;
+            border: 1px solid #ccc;
+            text-align: left;
+        }
+        tr:nth-child(even) {
+            background-color: #f9fcff;
+        }
+        .note {
+            margin-top: 30px;
+            font-size: 13px;
+            background-color: #fff9c4;
+            padding: 15px;
+            border-left: 5px solid #fbc02d;
+        }
+    </style>
 </head>
 <body>
-    {% block content %}
-      <h2>Jadwal Les</h2>
-    
-      <table>
-        <thead>
-          <tr>
-            <th>Hari</th>
-            <th>Waktu</th>
-            <th>Guru</th>
-            <th>Mata Pelajaran</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for jadwal in jadwal %}
-            <tr>
-              <td>{{ jadwal.hari }}</td>
-              <td>{{ jadwal.waktu }}</td>
-              <td>{{ jadwal.guru }}</td>
-              <td>{{ jadwal.mata_pelajaran }}</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    
-    {% endblock %}
-    
+    <div class="header">Jadwal Les</div>
+    <div class="container">
+        <div class="controls">
+            <select name="semester">
+                <option value="">Pilih Semester</option>
+                <option value="genap">Genap</option>
+                <option value="ganjil">Ganjil</option>
+            </select>
+            <div>
+                <button class="btn-green">CETAK</button>
+                <button class="btn-blue">CEK JADWAL</button>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Kode Jadwal</th>
+                    <th>Mata Pelajaran</th>
+                    <th>Guru</th>
+                    <th>Kelas</th>
+                    <th>Hari</th>
+                    <th>Jam</th>
+                    <th>Tanggal Mulai</th>
+                    <th>Tanggal Akhir</th>
+                    <th>Kelompok</th>
+                    <th>Ruangan</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for jadwal in jadwals %}
+                <tr>
+                    <td>{{ jadwal.kode }}</td>
+                    <td>{{ jadwal.mata_pelajaran }}</td>
+                    <td>{{ jadwal.nama_guru }}</td>
+                    <td>{{ jadwal.kelas }}</td>
+                    <td>{{ jadwal.hari }}</td>
+                    <td>{{ jadwal.jam_mulai }} - {{ jadwal.jam_selesai }}</td>
+                    <td>{{ jadwal.tanggal_mulai }}</td>
+                    <td>{{ jadwal.tanggal_akhir }}</td>
+                    <td>{{ jadwal.kelompok }}</td>
+                    <td>{{ jadwal.ruangan }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="note">
+            <p>• Fitur ini digunakan untuk melihat jadwal les, guru pengajar, serta ruangan pembelajaran pada semester aktif.<br>
+            • Silakan klik nama mata pelajaran untuk melihat status kehadiran guru dan download modul les jika tersedia.</p>
+        </div>
+    </div>
 </body>
 </html>

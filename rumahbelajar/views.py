@@ -13,7 +13,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
 from keuangan.models import PembayaranSPP, Siswa, OrangTua
 from keuangan.forms import BuktiPembayaranForm
- 
+from .models import JadwalLes
 
 
 # Dekorator custom
@@ -24,35 +24,32 @@ def group_required(group_name):
 
 @login_required
 @group_required('Siswa')
-def absensi_siswa(request):
+def absensi_siswa(request, siswa_id):
     if request.user.groups.filter(name='Siswa').exists():
-        siswa = Siswa.objects.get(user=request.user)
+        siswa = get_object_or_404(Siswa, id=siswa_id)
         if request.method == 'POST':
             form = AbsensiForm(request.POST)
             if form.is_valid():
                 absensi = form.save(commit=False)
                 absensi.siswa = siswa
                 absensi.save()
-                return redirect('absensi_siswa')  # Ganti dengan nama URL kamu
+                return redirect('rumahbelajar:absensi_siswa', siswa_id=siswa.id)  # ✅ Pakai namespace dan parameter
         else:
             form = AbsensiForm()
         return render(request, 'siswa/absensi_siswa.html', {'form': form})
     else:
-        return redirect('home')  # Ganti dengan halaman utama
+        return redirect('dashboard')  # FIX: fallback redirect ke root jika 'home' tidak ada
 
-@login_required
-@group_required('Siswa')
+
 def lihat_absensi_sendiri(request):
-    siswa = request.user.siswa
-    absen = Absensi.objects.filter(siswa=siswa)
-    return render(request, 'siswa/absensi.html', {'absen': absen})
-
+    # Menampilkan data absensi atau apa pun yang perlu ditampilkan
+    return render(request, 'absen/lihat_absensi_siswa.html')
 
 
 @login_required
 def jadwal_les(request):
     jadwal = JadwalLes.objects.all()
-    return render(request, 'jadwal_les.html', {'jadwal': jadwal})
+    return render(request, 'absen/jadwal_les.html', {'jadwals': jadwals})
 
 
 @login_required
@@ -134,27 +131,23 @@ def dashboard_siswa(request):
 
 @login_required
 def dashboard_orangtua(request):
-    try:
-        orang_tua = request.user.keuangan_orangtua
-        siswa = Siswa.objects.filter(orang_tua=orang_tua)
-        PembayaranSPP = PembayaranSPP.objects.filter(siswa__in=siswa)
-        context = {
-            'orang_tua': orang_tua,
-            'siswa': siswa,
-        }
+    anak = get_object_or_404(Siswa, orangtua=request.user)
+    total_kehadiran = Presensi.objects.filter(siswa=anak, status='Hadir').count()
+    total_tagihan = Tagihan.objects.filter(siswa=anak).aggregate(Sum('jumlah'))['jumlah__sum'] or 0
+    status_tagihan = 'Lunas' if not Tagihan.objects.filter(siswa=anak, status='Belum Lunas').exists() else 'Belum Lunas'
 
-        return render(request, 'orangtua/dashboard_orangtua.html', context)
-
-    
-    except OrangTua.DoesNotExist:
-        # Jika user tidak ditemukan sebagai orang tua
-        return render(request, 'absensi/home.html')
+    context = {
+        'anak': anak,
+        'total_kehadiran': total_kehadiran,
+        'total_tagihan': total_tagihan,
+        'status_tagihan': status_tagihan,
+    }
+    return render(request, 'dashboard_orangtua.html', context)
 
 
 
 def home(request):
-    """Halaman Home - Halaman utama aplikasi"""
-    return render(request, 'absensi/home.html')  
+    return render(request, 'home.html')
 
 def logout_view(request):
     logout(request)
@@ -177,9 +170,10 @@ def login_view(request):
 
 
 @login_required
+@group_required('OrangTua')
 def dashboard_orangtua(request):
     try:
-        orang_tua = request.user.keuangan_orangtua  # atau tergantung related_name-nya
+        orang_tua = request.user.keuangan_orangtua  # Make sure the related name matches your model
         siswa_list = Siswa.objects.filter(orang_tua=orang_tua)
         tagihan_list = PembayaranSPP.objects.filter(siswa__in=siswa_list)
 
@@ -187,10 +181,19 @@ def dashboard_orangtua(request):
             'orang_tua': orang_tua,
             'siswa': siswa_list,
             'tagihan': tagihan_list,
-            'form': BuktiPembayaranForm(),  # kalau pakai form bukti pembayaran
+            'form': BuktiPembayaranForm(),  # if you're using the upload form
         }
 
         return render(request, 'orangtua/dashboard_orangtua.html', context)
 
     except OrangTua.DoesNotExist:
-        return redirect('home')  # atau halaman error lain
+        return redirect('dashboard')  # or handle differently
+
+
+def jadwal_les_view(request):
+    jadwals = JadwalLes.objects.all().order_by('hari', 'jam')
+    return render(request, 'absensi/jadwal_les.html', {'jadwals': jadwals})
+
+# rumahbelajar/views.py
+from django.shortcuts import render
+
