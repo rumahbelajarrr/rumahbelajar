@@ -1,25 +1,126 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=\, initial-scale=1.0">
-    <title>Document</title>
+    <title>Absensi Siswa</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 14px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #1976d2;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f1f1f1;
+        }
+
+        .action-menu {
+            position: relative;
+            display: inline-block;
+        }
+
+        .menu-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            border-radius: 8px;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .dropdown-menu a {
+            display: block;
+            padding: 10px 16px;
+            text-decoration: none;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .dropdown-menu a:hover {
+            background-color: #f2f2f2;
+        }
+
+        .action-menu:hover .dropdown-menu {
+            display: block;
+        }
+    </style>
 </head>
 <body>
-    {% block content %}
-      <h2>Absensi Siswa</h2>
-    
-      <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Kirim Absensi</button>
-      </form>
-    
-      <a href="{% url 'lihat_absensi_siswa' %}">Lihat Absensi Anda</a>
-    {% endblock %}
-    
-    
+<div class="container">
+    <h2>Absensi Siswa</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Pertemuan</th>
+                <th>Tanggal</th>
+                <th>Status</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pertemuan in pertemuan_list %}
+            <tr>
+                <td>Pertemuan ke-{{ pertemuan.nomor }}</td>
+                <td>{{ pertemuan.tanggal }}</td>
+                <td>{{ pertemuan.status }}</td>
+                <td>
+                    <div class="action-menu">
+                        <button class="menu-button"><i class="fas fa-ellipsis-v"></i></button>
+                        <div class="dropdown-menu">
+                            <a href="{% url 'rumahbelajar:absensi_siswa' siswa.id %}?pertemuan={{ pertemuan.nomor }}">Lihat Detail</a>
+                            <a href="{% url 'rumahbelajar:scan_qr' siswa.id pertemuan.nomor %}">Scan QR</a>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4">Belum ada data pertemuan.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 </body>
 </html>
-
-

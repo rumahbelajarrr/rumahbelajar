@@ -12,8 +12,6 @@
         }
         body {
             font-family: 'Segoe UI', sans-serif;
-            margin: 0;
-            padding: 0;
             display: flex;
             background-color: #f5f7fa;
             height: 100vh;
@@ -68,8 +66,8 @@
         }
 
         .dashboard-overview {
-            display: flex;
-            flex-direction: column;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 25px;
             margin-top: 25px;
         }
@@ -81,71 +79,14 @@
             box-shadow: 0 5px 20px rgba(0,0,0,0.05);
         }
 
-        .info-card ul {
-            margin-top: 10px;
-            padding-left: 20px;
-        }
-
-        .info-card li {
-            margin-bottom: 10px;
-        }
-
-        .table-responsive {
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-
-        th, td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-
-        th {
-            background-color: #2e3b55;
-            color: white;
-        }
-
-        .btn {
-            padding: 6px 12px;
-            font-size: 0.9rem;
-            border-radius: 5px;
-        }
-
-        .btn-outline-primary {
-            background-color: transparent;
-            border: 1px solid #007bff;
-            color: #007bff;
+        .card.clickable {
             cursor: pointer;
-            text-decoration: none;
+            transition: background-color 0.3s, transform 0.2s;
         }
 
-        .btn-outline-primary:hover {
-            background-color: #007bff;
-            color: #fff;
-        }
-
-        .btn-success {
-            background-color: #28a745;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-
-        .badge {
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 0.85rem;
-        }
-
-        .bg-success {
-            background-color: #28a745;
-            color: white;
+        .card.clickable:hover {
+            background-color: #e5f0ff;
+            transform: translateY(-2px);
         }
 
         footer {
@@ -153,27 +94,6 @@
             text-align: center;
             font-size: 0.9rem;
             color: #777;
-        }
-
-        .anak-nama {
-            cursor: pointer;
-            font-weight: bold;
-            color: #1e3a8a;
-        }
-
-        .anak-submenu {
-            margin-top: 8px;
-            margin-left: 20px;
-            display: none;
-        }
-
-        .anak-submenu li a {
-            color: #1e3a8a;
-            text-decoration: none;
-        }
-
-        .anak-submenu li a:hover {
-            text-decoration: underline;
         }
     </style>
 </head>
@@ -183,13 +103,8 @@
     <div class="sidebar-header">Menu Orang Tua</div>
     <ul class="sidebar-menu">
         <li><a href="{% url 'rumahbelajar:home' %}">🏠 Beranda</a></li>
-        <li class="dropdown">
-            <a href="#">👨‍👧 Anak</a>
-            <ul class="dropdown-menu">
-                <li><a href="{% url 'rumahbelajar:absensi_siswa' siswa.id %}">Absen {{ siswa.nama }}</a></li>
-                
-            </ul>
-        </li>
+        <li><a href="{% url 'rumahbelajar:akademik_siswa' %}">👨‍👧 Akademik Anak</a></li>  
+        <li><a href="#">👨‍👧 Presensi Anak</a></li>  
         <li><a href="#"><span>💳</span> Tagihan</a></li>
         <li><a href="#"><span>📞</span> Kontak</a></li>
         <li><a href="#"><span>🔒</span> Logout</a></li>
@@ -203,97 +118,23 @@
     </div>
 
     <div class="dashboard-overview">
-
-        <!-- Anak-anak -->
-        <div class="card info-card">
+        <div class="card clickable" onclick="location.href='{% url 'rumahbelajar:akademik_siswa' %}'">
             <h3>👧 Anak-Anak Anda</h3>
-            {% if siswa %}
-                <ul>
-                    {% for s in siswa %}
-                        <li>
-                            <span class="anak-nama" onclick="toggleDetail('{{ s.id }}')">{{ s.nama }}</span> ({{ s.kelas }})
-                            <ul id="detail-{{ s.id }}" class="anak-submenu">
-                                <!-- Menghapus link absensi dari sini -->
-                            </ul>
-                        </li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <p class="text-muted">Belum ada data anak.</p>
-            {% endif %}
         </div>
 
-        <!-- Tagihan -->
-        <div class="card info-card">
+        <div class="card clickable" onclick="location.href='#'">
             <h3>💳 Tagihan Terbaru</h3>
-            {% if tagihan %}
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Bulan</th>
-                            <th>Jumlah</th>
-                            <th>Bukti</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for bayar in tagihan %}
-                        <tr>
-                            <td>{{ forloop.counter }}</td>
-                            <td>{{ bayar.bulan }}</td>
-                            <td>Rp{{ bayar.jumlah_bayar }}</td>
-                            <td>
-                                {% if bayar.bukti_pembayaran %}
-                                    <a href="{{ bayar.bukti_pembayaran.url }}" class="btn btn-outline-primary" target="_blank">Lihat</a>
-                                {% else %}
-                                    Belum Ada
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if bayar.status_bayar == 'belum lunas' %}
-                                <form method="POST" enctype="multipart/form-data">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="pembayaran_id" value="{{ bayar.id }}">
-                                    {{ form.bukti_pembayaran }}
-                                    <button type="submit" class="btn btn-success">Upload</button>
-                                </form>
-                                {% else %}
-                                    <span class="badge bg-success">Lunas</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% else %}
-                <p class="text-muted">Tidak ada tagihan saat ini.</p>
-            {% endif %}
         </div>
 
-        <!-- Info Akun -->
-        <div class="card info-card">
+        <div class="card clickable" onclick="location.href='#'">
             <h3>👨‍💼 Informasi Akun</h3>
-            <p><strong>Nama:</strong> {{ orang_tua.nama }}</p>
-            <p><strong>Alamat:</strong> {{ orang_tua.alamat }}</p>
-            <p><strong>Telepon:</strong> {{ orang_tua.no_telp }}</p>
         </div>
-
     </div>
 
     <footer>
         © 2025 Sistem Absensi Bimbel | All Rights Reserved
     </footer>
 </div>
-
-<script>
-    function toggleDetail(id) {
-        const detail = document.getElementById('detail-' + id);
-        detail.style.display = detail.style.display === 'none' ? 'block' : 'none';
-    }
-</script>
 
 </body>
 </html>

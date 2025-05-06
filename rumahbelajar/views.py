@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from .models import Absensi, Siswa, Guru, JadwalLes, OrangTua
+from .models import Absensi, Siswa, Guru, JadwalLes, OrangTua, MataPelajaran
 from .forms import AbsensiForm
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, redirect, get_object_or_404
@@ -14,13 +14,14 @@ from django.contrib import messages
 from keuangan.models import PembayaranSPP, Siswa, OrangTua
 from keuangan.forms import BuktiPembayaranForm
 from .models import JadwalLes
+from .models import Kelas
 
 
 # Dekorator custom
 def group_required(group_name):
     def in_group(user):
         return user.is_authenticated and user.groups.filter(name=group_name).exists()
-    return user_passes_test(in_group, login_url='home')  # Redirect kalau gak sesuai grup
+    return user_passes_test(in_group, login_url='rumahbelajar:home')  # Redirect kalau gak sesuai grup
 
 @login_required
 @group_required('Siswa')
@@ -38,7 +39,7 @@ def absensi_siswa(request, siswa_id):
             form = AbsensiForm()
         return render(request, 'siswa/absensi_siswa.html', {'form': form})
     else:
-        return redirect('dashboard')  # FIX: fallback redirect ke root jika 'home' tidak ada
+        return redirect('rumahbelajar:home')  # FIX: fallback redirect ke root jika 'home' tidak ada
 
 
 def lihat_absensi_sendiri(request):
@@ -68,7 +69,7 @@ def absen_guru(request):
             form = AbsensiForm()
         return render(request, 'guru/absen_guru.html', {'form': form})
     else:
-        return redirect('home')
+        return redirect('rumahbelajar:home')
     
 @login_required
 @group_required('Guru')
@@ -117,12 +118,15 @@ def redirect_dashboard(request):
     elif request.user.groups.filter(name='OrangTua').exists():
         return redirect('rumahbelajar:dashboard_OrangTua')
     else:
-        return redirect('home')  # Jika role tidak terdaftar
+        return redirect('rumahbelajar:home')  # Jika role tidak terdaftar
  
-@login_required
-@group_required('Guru')   
 def dashboard_guru(request):
-    return render(request, 'guru/dashboard_guru.html')
+    context = {
+        'jumlah_siswa': Siswa.objects.count(),
+        'jumlah_kelas': Kelas.objects.count(),
+        'jumlah_mapel': MataPelajaran.objects.count(),
+    }
+    return render(request, 'guru/dashboard_guru.html', context)
 
 @login_required
 @group_required('Siswa')
@@ -144,15 +148,12 @@ def dashboard_orangtua(request):
     }
     return render(request, 'dashboard_orangtua.html', context)
 
-
-
 def home(request):
-    return render(request, 'home.html')
+    return render(request, 'absensi/home.html')
 
 def logout_view(request):
     logout(request)
     return redirect('home') 
-
 
 def login_view(request):
     if request.method == 'POST':
@@ -165,8 +166,6 @@ def login_view(request):
         else:
             messages.error(request, 'Username atau password salah!')
     return render(request, 'absensi/login.html')  # Pastikan ada template login.html
-
-
 
 
 @login_required
@@ -187,13 +186,38 @@ def dashboard_orangtua(request):
         return render(request, 'orangtua/dashboard_orangtua.html', context)
 
     except OrangTua.DoesNotExist:
-        return redirect('dashboard')  # or handle differently
+        return redirect('rumahbelajar:home')  # or handle differently
 
 
-def jadwal_les_view(request):
-    jadwals = JadwalLes.objects.all().order_by('hari', 'jam')
-    return render(request, 'absensi/jadwal_les.html', {'jadwals': jadwals})
+def jadwal_les(request):
+    jadwals = JadwalLes.objects.all()  # Replace with actual model query
+    return render(request, 'jadwal_les.html', {'jadwals': jadwals})
 
 # rumahbelajar/views.py
 from django.shortcuts import render
 
+def daftar_siswa(request):
+    siswa_list = Siswa.objects.all()  # Mengambil semua data siswa dari database
+    return render(request, 'guru/daftar_siswa.html', {'siswa_list': siswa_list})
+
+def akademik(request):
+    # Ambil data kelas dan mata pelajaran dari database
+    kelas_list = Kelas.objects.all()  # atau sesuaikan dengan query yang sesuai
+    
+    # Render halaman akademik dengan data kelas dan mata pelajaran
+    return render(request, 'guru/akademik.html', {'kelas_list': kelas_list})
+
+def akademik_siswa_view(request):
+    return render(request, 'siswa/akademik_siswa.html')
+
+def dashboard_admin(request):
+    jumlah_siswa = Siswa.objects.count()
+    jumlah_kelas = Kelas.objects.count()
+    jumlah_mapel = MataPelajaran.objects.count()
+    
+    context = {
+        'jumlah_siswa': jumlah_siswa,
+        'jumlah_kelas': jumlah_kelas,
+        'jumlah_mapel': jumlah_mapel,
+    }
+    return render(request, 'admin/dashboard_admin.html', context)

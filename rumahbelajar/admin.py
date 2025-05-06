@@ -1,5 +1,8 @@
 from django.contrib import admin
 from .models import OrangTua, Siswa, Guru, JadwalLes, Absensi
+from .models import Kelas
+
+admin.site.register(Kelas)
 
 # Pendaftaran model OrangTua
 @admin.register(OrangTua)
@@ -20,12 +23,11 @@ class GuruAdmin(admin.ModelAdmin):
     list_display = ['nama', 'user', 'no_telp', 'mata_pelajaran']
     search_fields = ['nama', 'mata_pelajaran']
 
-# Pendaftaran model JadwalLes
-@admin.register(JadwalLes)
 class JadwalLesAdmin(admin.ModelAdmin):
-    list_display = ['hari', 'jam', 'guru']
-    list_filter = ['hari', 'guru']
+    list_display = ('hari', 'jam', 'guru')  # pastikan 'jam' dan 'guru' ada di model
+    list_filter = ('guru',)
 
+admin.site.register(JadwalLes, JadwalLesAdmin)
 # Pendaftaran model Absensi
 @admin.register(Absensi)
 class AbsensiAdmin(admin.ModelAdmin):

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daftar Siswa</title>
+    <title>Akademik Guru</title>
     <link rel="stylesheet" href="{% static 'css/dashboard_guru.css' %}">
     <style>
         * {
@@ -103,26 +103,30 @@
             }
         }
 
-        /* Daftar Siswa */
-        .siswa-list {
+        /* Daftar Akademik */
+        .akademik-list {
             margin-top: 30px;
         }
 
-        .siswa-list table {
+        .akademik-list table {
             width: 100%;
             border-collapse: collapse;
         }
 
-        .siswa-list th,
-        .siswa-list td {
+        .akademik-list th,
+        .akademik-list td {
             padding: 10px;
             border: 1px solid #ddd;
             text-align: center;
         }
 
-        .siswa-list th {
+        .akademik-list th {
             background-color: #1e3a8a;
             color: white;
+        }
+
+        .akademik-list td {
+            background-color: #f9f9f9;
         }
 
         /* Footer */
@@ -138,16 +142,13 @@
     <!-- Sidebar -->
     <nav class="sidebar">
         <div class="sidebar-header">
-            <h2>Menu Guru</h2>
+            <h2>Menu Siswa</h2>
         </div>
         <ul class="sidebar-menu">
             <li><a href="{% url 'rumahbelajar:home' %}">🏠 Beranda</a></li>
-            <li><a href="{% url 'rumahbelajar:daftar_siswa' %}">📋 Daftar Siswa</a></li> <!-- Menu Daftar Siswa -->
             <li><a href="{% url 'rumahbelajar:akademik' %}">📚 Akademik</a></li>
-            <li><a href="#">📝 Presensi Guru</a></li>
-            <li><a href="#">📝 Presensi Siswa</a>
-            </li>
-            </li>
+            <li><a href="#">📝 Presensi</a></li>
+            <li><a href="{% url 'keuangan:tagihan_spp' %}">💰 Keuangan</a></li>
             <li><a href="{% url 'rumahbelajar:logout' %}">🚪 Logout</a></li>
         </ul>
     </nav>
@@ -156,32 +157,30 @@
     <div class="main-content">
         <header class="main-header">
             <h1>Hai, {{ request.user.username }} 👋</h1>
-            <p>Selamat datang di Daftar Siswa.</p>
+            <p>Selamat datang di Daftar Akademik.</p>
         </header>
 
-        <!-- Daftar Siswa -->
-        <div class="card siswa-list">
-            <h3>📚 Daftar Siswa</h3>
+        <!-- Akademik -->
+        <div class="card akademik-list">
+            <h3>📚 Daftar Akademik</h3>
             <table>
                 <thead>
                     <tr>
                         <th>No</th>
-                        <th>Nama Siswa</th>
                         <th>Kelas</th>
-                        <th>Orang Tua</th>
+                        <th>Mata Pelajaran</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for siswa in siswa_list %}
+                    {% for kelas in kelas_list %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
-                        <td>{{ siswa.nama }}</td>
-                        <td>{{ siswa.kelas }}</td>
-                        <td>{{ siswa.orang_tua }}</td>
+                        <td>{{ kelas.nama }}</td>
+                        <td>{{ kelas.mata_pelajaran }}</td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="4">Tidak ada data siswa</td>
+                        <td colspan="3">Tidak ada data akademik</td>
                     </tr>
                     {% endfor %}
                 </tbody>

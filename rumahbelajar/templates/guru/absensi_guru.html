@@ -1,22 +1,58 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Absensi Guru</title>
+    <link rel="stylesheet" href="{% static 'css/absensi_guru.css' %}">
 </head>
 <body>
-    {% block content %}
-      <h2>Absen Guru</h2>
-    
-      <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Kirim Absensi</button>
-      </form>
-    
-      <a href="{% url 'lihat_absensi_siswa' %}">Lihat Absensi Siswa</a>
-    {% endblock %}
-    
+    <div class="container">
+        <header>
+            <h1>Absensi Siswa</h1>
+            <p>Selamat datang, Pak/Bu {{ user.username }}</p>
+        </header>
+
+        <section class="kelas-info">
+            <h2>Daftar Siswa - Kelas {{ kelas.nama }}</h2>
+            <p>Total siswa: {{ siswa_list|length }}</p>
+        </section>
+
+        <form method="post">
+            {% csrf_token %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Nama Siswa</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for siswa in siswa_list %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ siswa.nama }}</td>
+                        <td>
+                            <label>
+                                <input type="radio" name="absen_{{ siswa.id }}" value="hadir" required> Hadir
+                            </label>
+                            <label>
+                                <input type="radio" name="absen_{{ siswa.id }}" value="tidak_hadir"> Tidak Hadir
+                            </label>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3">Belum ada data siswa.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="submit-section">
+                <button type="submit">Simpan Absensi</button>
+            </div>
+        </form>
+    </div>
 </body>
 </html>

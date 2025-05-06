@@ -1,9 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-
-
-
 class OrangTua(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='rumahbelajar_orangtua')
     nama = models.CharField(max_length=100)
@@ -36,12 +33,12 @@ class Guru(models.Model):
 
 
 class JadwalLes(models.Model):
-    hari = models.CharField(max_length=10)  # Senin, Selasa, dst
-    jam = models.TimeField()
-    guru = models.ForeignKey(Guru, on_delete=models.CASCADE)
-
+    hari = models.CharField(max_length=10)
+    jam = models.CharField(max_length=20)  # Pastikan ada atribut jam
+    guru = models.ForeignKey('Guru', on_delete=models.CASCADE)  # Pastikan ada atribut guru
+    
     def __str__(self):
-        return f"{self.hari} - {self.jam} - {self.guru.nama}"
+        return f"{self.hari} - {self.jam}"
 
 
 class Absensi(models.Model):
@@ -68,3 +65,16 @@ class Absensi(models.Model):
             return f"Absensi Guru - {self.guru.nama} - {self.tanggal}"
         return "Absensi Tidak Lengkap"
 
+# models.py
+from django.db import models
+
+class Kelas(models.Model):
+    nama = models.CharField(max_length=100)  # Nama kelas, contoh: 'Kelas 1A'
+    mata_pelajaran = models.CharField(max_length=100)  # Mata pelajaran yang diajarkan, contoh: 'Matematika'
+
+    def __str__(self):
+        return f"{self.nama} - {self.mata_pelajaran}"
+
+class MataPelajaran(models.Model):
+    nama_pelajaran = models.CharField(max_length=100)
+    kelas = models.ForeignKey('Kelas', on_delete=models.CASCADE)
