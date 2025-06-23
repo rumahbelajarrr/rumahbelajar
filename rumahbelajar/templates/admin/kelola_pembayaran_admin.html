@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Pembayaran SPP</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f8;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        nav.sidebar {
+            width: 260px;
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            color: white;
+            padding: 20px;
+            position: fixed;
+            height: 100%;
+            box-shadow: 2px 0 12px rgba(0, 0, 0, 0.15);
+            overflow-y: auto;
+            z-index: 999;
+        }
+
+        .sidebar h2 {
+            font-size: 1.8rem;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 15px;
+            display: block;
+            border-radius: 10px;
+            transition: all 0.3s ease-in-out;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        .sidebar a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateX(5px);
+        }
+
+        .main-content {
+            margin-left: 260px;
+            flex: 1;
+            padding: 40px 20px;
+        }
+
+     .header {
+      background-color: #ffffff;
+      padding: 1rem 2rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #1e3a8a;
+      margin-bottom: 30px;
+      border-radius: 10px;
+    }
+
+
+        table {
+            width: 100%;
+            background-color: white;
+            border-collapse: collapse;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+
+        thead {
+            background-color: #0072ff;
+            color: white;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .btn {
+            padding: 8px 12px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background-color: #218838;
+        }
+
+        form.inline {
+            display: inline;
+        }
+
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background-color: #1e3a8a;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding-top: 80px;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <button class="menu-toggle" onclick="toggleSidebar()">☰ Menu</button>
+
+    <div class="container">
+        <!-- Sidebar -->
+        <nav class="sidebar" id="sidebar">
+            <h2>Admin Panel</h2>
+            <ul>
+                <li><a href="{% url 'rumahbelajar:dashboard_admin' %}">📊 Dashboard</a></li>
+                <li><a href="{% url 'rumahbelajar:data_siswa' %}">👨‍🎓 Data Siswa</a></li>
+                <li><a href="{% url 'rumahbelajar:data_orang_tua' %}">👨‍👩‍👧 Data Orang Tua</a></li>
+                <li><a href="{% url 'rumahbelajar:data_guru_admin' %}">👩‍🏫 Data Guru</a></li>
+                <li><a href="{% url 'rumahbelajar:kelas' %}">🏫 Data Kelas</a></li>
+                <li><a href="{% url 'rumahbelajar:mata_pelajaran_admin' %}">📚 Data Mata Pelajaran</a></li>
+                <li><a href="{% url 'rumahbelajar:presensi_guru_admin' %}">📝 Presensi Guru</a></li>
+                <li><a href="{% url 'rumahbelajar:generate_admin_qrcode' %}">📝 QR Code Guru</a></li>
+                <li><a href="{% url 'rumahbelajar:tambah_presensi' %}">📝 Tambah Presensi</a></li>
+                <li><a href="{% url 'keuangan:rekap_keuangan' %}">📈 Rekap Keuangan</a></li>
+                <li><a href="{% url 'rumahbelajar:presensi_siswa_admin' %}">📝 Presensi Siswa</a></li>
+                <li><a href="{% url 'keuangan:kelola_pembayaran' %}">💰 Kelola Pembayaran</a></li>
+                <li><a href="{% url 'rumahbelajar:login' %}">🔒 Logout</a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <h2>Kelola Pembayaran SPP</h2>
+
+            <div class="filter-section">
+                <h3>Filter Pembayaran</h3>
+                <form method="get" class="filter-form">
+                    <div class="form-group">
+                        <label for="kelas">Kelas:</label>
+                        <select name="kelas" id="kelas" class="form-control">
+                            <option value="">Pilih Kelas</option>
+                            {% for kelas in kelas_list %}
+                                <option value="{{ kelas }}" {% if kelas == kelas_terpilih %}selected{% endif %}>
+                                    {{ kelas }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="year">Tahun:</label>
+                        <select name="year" id="year" class="form-control">
+                            <option value="">Semua Tahun</option>
+                            {% for year in year_range %}
+                                <option value="{{ year }}" {% if year|stringformat:"s" == selected_year %}selected{% endif %}>
+                                    {{ year }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">Filter</button>
+                    </div>
+                </form>
+            </div>
+
+            {% if not kelas_terpilih %}
+                <h3>Daftar Kelas</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nama Kelas</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for kelas in kelas_list %}
+                        <tr>
+                            <td>{{ kelas }}</td>
+                            <td>
+                                <form method="get" class="inline">
+                                    <input type="hidden" name="kelas" value="{{ kelas }}">
+                                    <button type="submit" class="btn">Lihat Detail</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+            {% elif kelas_terpilih and not siswa_terpilih %}
+                <h3>Daftar Siswa - Kelas {{ kelas_terpilih }}</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nama Siswa</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for siswa in siswa_list %}
+                        <tr>
+                            <td>{{ siswa.nama }}</td>
+                            <td>
+                                <form method="get" class="inline">
+                                    <input type="hidden" name="kelas" value="{{ kelas_terpilih }}">
+                                    <input type="hidden" name="siswa_id" value="{{ siswa.id }}">
+                                    <button type="submit" class="btn">Lihat Tagihan</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+            {% elif siswa_terpilih %}
+                <h3>Tagihan SPP - {{ siswa_terpilih.nama }}</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Bulan</th>
+                            <th>Jumlah Bayar</th>
+                            <th>Status</th>
+                            <th>Tanggal Bayar</th>
+                            <th>Bukti</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in pembayaran_list %}
+                        <tr>
+                            <td>{{ item.bulan_nama }}</td>
+                            <td>Rp{{ item.jumlah_bayar }}</td>
+                            <td>{{ item.status_bayar }}</td>
+                            <td>{{ item.tanggal_bayar|default:"-" }}</td>
+                            <td>
+                                {% if item.bukti_pembayaran %}
+                                    <a href="{{ item.bukti_pembayaran.url }}" target="_blank">Lihat</a>
+                                {% else %}
+                                    Tidak Ada
+                                {% endif %}
+                            </td>
+                            <td>
+                                <form method="post" class="inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="pembayaran_id" value="{{ item.id }}">
+                                    <select name="status_baru" onchange="this.form.submit()">
+                                        <option value="belum lunas" {% if item.status_bayar == 'belum lunas' %}selected{% endif %}>Belum Lunas</option>
+                                        <option value="lunas" {% if item.status_bayar == 'lunas' %}selected{% endif %}>Lunas</option>
+                                    </select>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <br>
+                <a href="{% url 'keuangan:kelola_pembayaran' %}" class="btn">Kembali ke Daftar Kelas</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+        }
+    </script>
+
+</body>
+</html>

@@ -1,18 +1,165 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Tagihan SPP</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(to right, #e0eafc, #cfdef3);
-            padding: 40px;
+            padding: 40px 20px 40px 300px; /* menyesuaikan sidebar */
             margin: 0;
             animation: fadeIn 1s ease-in;
         }
-    
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            color: white;
+            padding: 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            box-shadow: 2px 0 12px rgba(0, 0, 0, 0.15);
+            z-index: 100;
+            transition: all 0.4s ease-in-out;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.8rem;
+            text-align: center;
+            margin-bottom: 30px;
+            animation: fadeIn 1s ease-in-out;
+            color: #ffffff;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar-menu li {
+            margin: 15px 0;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: white;
+            text-decoration: none;
+            padding: 10px 12px;
+            border-radius: 10px;
+            transition: all 0.3s ease-in-out;
+            font-weight: 500;
+        }
+
+        .sidebar-menu a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateX(5px);
+        }
+
+        /* Hamburger Menu */
+        .hamburger {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: #1e3a8a;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 99;
+        }
+
+        .filter-section {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .filter-form {
+            display: flex;
+            gap: 15px;
+            align-items: end;
+            flex-wrap: wrap;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #374151;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            padding: 10px 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
         h2 {
             text-align: center;
             color: #2c3e50;
@@ -20,7 +167,7 @@
             margin-bottom: 30px;
             animation: slideDown 1s ease-out;
         }
-    
+
         table {
             width: 100%;
             border-collapse: collapse;
@@ -30,75 +177,56 @@
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             animation: fadeInUp 0.8s ease-out;
         }
-    
+
         th, td {
             padding: 15px 20px;
             text-align: center;
             font-size: 1em;
         }
-    
+
         thead {
             background-color: #3498db;
             color: white;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
-    
-        tbody tr {
-            transition: background-color 0.3s ease;
-        }
-    
+
         tbody tr:hover {
             background-color: #f0f9ff;
         }
-    
-        td a {
+
+        a {
             color: #2980b9;
             text-decoration: none;
             font-weight: bold;
-            transition: color 0.3s;
         }
-    
-        td a:hover {
+
+        a:hover {
             color: #1abc9c;
         }
-    
+
         input[type="file"] {
-            padding: 6px;
-            font-size: 0.9em;
-            border-radius: 6px;
-            border: 1px solid #ccc;
-            background-color: #f9f9f9;
-            transition: border-color 0.3s ease;
+            margin-bottom: 5px;
         }
-    
-        input[type="file"]:hover {
-            border-color: #3498db;
-        }
-    
+
         button {
-            margin-top: 6px;
-            padding: 8px 14px;
-            background-color: #2ecc71;
-            border: none;
-            border-radius: 6px;
+            background-color: #3498db;
             color: white;
-            font-weight: bold;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s;
         }
-    
+
         button:hover {
-            background-color: #27ae60;
-            transform: scale(1.05);
+            background-color: #2980b9;
         }
-    
-        /* Animations */
+
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
         }
-    
+
         @keyframes slideDown {
             from {
                 transform: translateY(-20px);
@@ -109,7 +237,7 @@
                 opacity: 1;
             }
         }
-    
+
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -120,17 +248,51 @@
                 transform: translateY(0);
             }
         }
-    
-        /* Responsive */
+
         @media (max-width: 768px) {
+            body {
+                padding: 100px 20px;
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .hamburger {
+                display: block;
+            }
+
+            .overlay.active {
+                display: block;
+            }
+
+            .filter-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .sidebar-menu {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .sidebar-menu li {
+                margin: 10px;
+            }
+
             table, thead, tbody, th, td, tr {
                 display: block;
             }
-    
+
             thead {
                 display: none;
             }
-    
+
             tr {
                 margin-bottom: 15px;
                 background-color: #fff;
@@ -138,13 +300,13 @@
                 box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
                 padding: 12px;
             }
-    
+
             td {
                 text-align: left;
                 padding: 10px 15px;
                 position: relative;
             }
-    
+
             td:before {
                 content: attr(data-label);
                 position: absolute;
@@ -154,60 +316,134 @@
                 text-transform: uppercase;
                 color: #888;
             }
-    
-            td input[type="file"], td button {
-                width: 100%;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 80px 15px 15px;
             }
         }
     </style>
 </head>
 <body>
 
-{% block content %}
-<h2>Tagihan SPP {{ request.user.username }}</h2>
+<!-- Hamburger Menu -->
+<button class="hamburger" onclick="toggleSidebar()">☰</button>
+<div class="overlay" onclick="toggleSidebar()"></div>
 
-<table border="1" cellpadding="8">
-    <thead>
-        <tr>
-            <th>Bulan</th>
-            <th>Jumlah</th>
-            <th>Status</th>
-            <th>Tanggal Bayar</th>
-            <th>Bukti Pembayaran</th>
-            <th>Upload Bukti</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for bayar in pembayaran_list %}
-        <tr>
-            <td>{{ bayar.get_bulan_display }}</td>
-            <td>Rp{{ bayar.jumlah_bayar }}</td>
-            <td>{{ bayar.status_bayar }}</td>
-            <td>{{ bayar.tanggal_bayar }}</td>
-            <td>
-                {% if bayar.bukti_pembayaran %}
-                    <a href="{{ bayar.bukti_pembayaran.url }}" target="_blank">Lihat</a>
-                {% else %}
-                    Belum Ada
-                {% endif %}
-            </td>
-            <td>
-                {% if bayar.status_bayar == 'belum lunas' %}
-                <form method="POST" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <input type="hidden" name="pembayaran_id" value="{{ bayar.id }}">
-                    {{ form.bukti_pembayaran }}
-                    <button type="submit">Upload</button>
-                </form>
-                {% else %}
-                    -
-                {% endif %}
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-{% endblock %}
+<!-- Sidebar -->
+<nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <h2>Menu Siswa</h2>
+    </div>
+    <ul class="sidebar-menu">
+        <li><a href="{% url 'rumahbelajar:dashboard_Siswa' %}">🏠 Beranda</a></li>
+        <li><a href="{% url 'rumahbelajar:akademik_siswa' %}">📚 Akademik</a></li>
+        <li><a href="{% url 'rumahbelajar:absensi_siswa' %}">📝 Presensi</a></li>
+        <li><a href="{% url 'rumahbelajar:riwayat_presensi_siswa' %}">📊 Riwayat Presensi</a></li>
+        <li><a href="{% url 'keuangan:tagihan_spp_siswa' %}">💰 Keuangan</a></li>
+        <li><a href="#" onclick="openChangePasswordModal()">🔐 Ubah Password</a></li>
+        <li><a href="{% url 'rumahbelajar:logout' %}">🚪 Logout</a></li>
+    </ul>
+</nav>
+
+<div class="main-content" style="margin: 20px;">
+    <h2>Tagihan SPP</h2>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <h3 style="margin-bottom: 15px; color: #1e3a8a;">🔍 Filter Periode Pembayaran</h3>
+        <form method="get" class="filter-form">
+            <div class="form-group">
+                <label for="year">Tahun</label>
+                <select id="year" name="year" class="form-control" style="padding: 14px;border-radius: 8px; border: #eaeaea 2px solid;">
+                    {% for year in year_range %}
+                        <option value="{{ year }}" {% if year|stringformat:"s" == selected_year %}selected{% endif %}>
+                            {{ year }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="start_date">Tanggal Mulai</label>
+                <input type="date" id="start_date" name="start_date" value="{{ start_date|default:'' }}">
+            </div>
+            <div class="form-group">
+                <label for="end_date">Tanggal Akhir</label>
+                <input type="date" id="end_date" name="end_date" value="{{ end_date|default:'' }}">
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">🔍 Filter</button>
+            </div>
+            <div class="form-group">
+                <a href="{% url 'keuangan:tagihan_spp_siswa' %}" class="btn btn-secondary">🔄 Reset</a>
+            </div>
+        </form>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Bulan</th>
+                <th>Jumlah Bayar</th>
+                <th>Status</th>
+                <th>Tanggal Bayar</th>
+                <th>Bukti Pembayaran</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pembayaran in pembayaran_list %}
+            <tr>
+                <td data-label="Bulan">{{ pembayaran.bulan_nama }}</td>
+                <td data-label="Jumlah Bayar">Rp {{ pembayaran.jumlah_bayar|floatformat:0 }}</td>
+                <td data-label="Status">
+                    {% if pembayaran.status_bayar == 'lunas' %}
+                        <span style="color: green; font-weight: bold;">✅ Lunas</span>
+                    {% else %}
+                        <span style="color: red; font-weight: bold;">❌ Belum Lunas</span>
+                    {% endif %}
+                </td>
+                <td data-label="Tanggal Bayar">
+                    {% if pembayaran.tanggal_bayar %}
+                        {{ pembayaran.tanggal_bayar|date:"d M Y" }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td data-label="Bukti Pembayaran">
+                    {% if pembayaran.bukti_pembayaran %}
+                        <a href="{{ pembayaran.bukti_pembayaran.url }}" target="_blank">Lihat</a>
+                    {% else %}
+                        Belum Ada
+                    {% endif %}
+                </td>
+                <td data-label="Aksi">
+                    {% if pembayaran.status_bayar != 'lunas' %}
+                        <form method="POST" enctype="multipart/form-data" style="display: inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="bulan_kode" value="{{ pembayaran.bulan_kode }}">
+                            <input type="file" name="bukti_pembayaran" accept="image/*,.pdf" required>
+                            <button type="submit">Upload Bukti</button>
+                        </form>
+                    {% else %}
+                        <span style="color: green;">✅ Sudah Lunas</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.querySelector('.overlay');
+    sidebar.classList.toggle('active');
+    overlay.classList.toggle('active');
+}
+</script>
 
 </body>
 </html>

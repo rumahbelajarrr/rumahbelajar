@@ -1,0 +1,453 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Riwayat Presensi Anak</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard_orangtua.css' %}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            display: flex;
+            height: 100vh;
+            background: #f3f4f6;
+            color: #111827;
+            overflow-x: hidden;
+        }
+
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            color: white;
+            padding: 20px;
+            position: fixed;
+            height: 100%;
+            transition: all 0.4s ease-in-out;
+            z-index: 100;
+            box-shadow: 2px 0 12px rgba(0, 0, 0, 0.15);
+            overflow-y: auto;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.8rem;
+            text-align: center;
+            margin-bottom: 30px;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin: 15px 0;
+            position: relative;
+        }
+
+        .sidebar-menu a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 15px;
+            display: block;
+            border-radius: 10px;
+            transition: all 0.3s ease-in-out;
+            font-weight: 500;
+        }
+
+        .sidebar-menu a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateX(5px);
+        }
+
+        .hamburger {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: #1e3a8a;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 99;
+        }
+
+        .main-content {
+            margin-left: 260px;
+            padding: 40px;
+            flex: 1;
+            animation: fadeInMain 0.8s ease-in-out;
+            transition: margin-left 0.4s ease-in-out;
+        }
+
+        @keyframes fadeInMain {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        .main-header h1 {
+            font-size: 2.2rem;
+            color: #1e3a8a;
+            margin-bottom: 25px;
+            animation: slideInLeft 0.7s ease-in-out;
+        }
+
+        @keyframes slideInLeft {
+            0% { opacity: 0; transform: translateX(-20px); }
+            100% { opacity: 1; transform: translateX(0); }
+        }
+
+        .card {
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 25px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: fadeInCard 0.7s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        @keyframes fadeInCard {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        .student-info {
+            background: linear-gradient(135deg, #dbeafe, #93c5fd);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .student-info h3 {
+            color: #1e40af;
+            margin-bottom: 10px;
+        }
+
+        .student-info p {
+            color: #1e40af;
+            margin: 5px 0;
+            font-weight: 500;
+        }
+
+        .filter-section {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .filter-form {
+            display: flex;
+            gap: 15px;
+            align-items: end;
+            flex-wrap: wrap;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #374151;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            padding: 10px 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .table th,
+        .table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .table th {
+            background: #1e3a8a;
+            color: white;
+            font-weight: 600;
+        }
+
+        .table tr:hover {
+            background: #f9fafb;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-hadir {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-tidak-hadir {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+            font-style: italic;
+        }
+
+        footer {
+            text-align: center;
+            color: #6b7280;
+            margin-top: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 80px 20px 20px;
+            }
+
+            .hamburger {
+                display: block;
+            }
+
+            .overlay.active {
+                display: block;
+            }
+
+            .main-header h1 {
+                font-size: 1.8rem;
+            }
+
+            .filter-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .table {
+                font-size: 14px;
+            }
+
+            .table th,
+            .table td {
+                padding: 8px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 80px 15px 15px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Hamburger Menu -->
+<button class="hamburger" onclick="toggleSidebar()">☰</button>
+<div class="overlay" onclick="toggleSidebar()"></div>
+
+<!-- Sidebar -->
+<nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <h2>Menu Orang Tua</h2>
+    </div>
+  <ul class="sidebar-menu">
+        <li><a href="{% url 'rumahbelajar:dashboard_OrangTua' %}">🏠 Beranda</a></li>
+        <li><a href="{% url 'rumahbelajar:akademik_anak' %}">👨‍👧 Akademik Anak</a></li>  
+        <li><a href="{% url 'rumahbelajar:pilih_anak' %}">👨‍👧 Presensi Anak</a></li>  
+        <li><a href="{% url 'keuangan:tagihan_spp_orangtua' %}"><span>💳</span> Tagihan</a></li>
+        <li><a href="#" onclick="openChangePasswordModal()">🔐 Ubah Password</a></li>
+        <li><a href="{% url 'rumahbelajar:login' %}"><span>🔒</span> Logout</a></li> 
+    </ul>
+</nav>
+
+<!-- Main Content -->
+<div class="main-content">
+    <header class="main-header">
+        <h1>Riwayat Presensi Anak</h1>
+        <p>Lihat riwayat presensi anak Anda berdasarkan periode yang dipilih.</p>
+    </header>
+
+    <div class="card">
+        <div class="student-info">
+            <h3>👤 Informasi Siswa</h3>
+            <p><strong>Nama:</strong> {{ siswa.nama }}</p>
+            <p><strong>Kelas:</strong> {{ siswa.kelas.nama }}</p>
+            <p><strong>NIS:</strong> {{ siswa.id }}</p>
+        </div>
+
+        <div class="filter-section">
+            <h3 style="margin-bottom: 15px; color: #1e3a8a;">🔍 Filter Periode</h3>
+            <form method="get" class="filter-form">
+                <div class="form-group">
+                    <label for="year">Tahun</label>
+                    <select id="year" name="year" class="form-control">
+                        <option value="">Semua Tahun</option>
+                        {% for year in year_range %}
+                            <option value="{{ year }}" {% if year|stringformat:"s" == selected_year %}selected{% endif %}>
+                                {{ year }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="start_date">Tanggal Mulai</label>
+                    <input type="date" id="start_date" name="start_date" value="{{ start_date|default:'' }}">
+                </div>
+                <div class="form-group">
+                    <label for="end_date">Tanggal Akhir</label>
+                    <input type="date" id="end_date" name="end_date" value="{{ end_date|default:'' }}">
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">🔍 Filter</button>
+                    <a href="{% url 'rumahbelajar:riwayat_presensi_anak' siswa.id %}" class="btn btn-secondary">🔄 Reset</a>
+                </div>
+            </form>
+        </div>
+
+        <div class="table-responsive">
+            {% if presensi_list %}
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Tanggal</th>
+                            <th>Mata Pelajaran</th>
+                            <th>Kelas</th>
+                            <th>Pertemuan</th>
+                            <th>Status</th>
+                            <th>Waktu Presensi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for presensi in presensi_list %}
+                        <tr>
+                            <td>{{ presensi.waktu_presensi|date:"d M Y" }}</td>
+                            <td>{{ presensi.presensi.mata_pelajaran.nama_pelajaran }}</td>
+                            <td>{{ presensi.presensi.kelas.nama }}</td>
+                            <td>Pertemuan {{ presensi.pertemuan_ke|default:"-" }}</td>
+                            <td>
+                                <span class="status-badge {% if presensi.status == 'Hadir' %}status-hadir{% else %}status-tidak-hadir{% endif %}">
+                                    {{ presensi.status }}
+                                </span>
+                            </td>
+                            <td>{{ presensi.waktu_presensi|date:"H:i" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="no-data">
+                    <h3>📋 Tidak ada data presensi</h3>
+                    <p>Belum ada riwayat presensi untuk periode yang dipilih.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Sistem Absensi Bimbel | All Rights Reserved</p>
+    </footer>
+</div>
+
+<script>
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.querySelector('.overlay');
+    sidebar.classList.toggle('active');
+    overlay.classList.toggle('active');
+}
+</script>
+
+</body>
+</html> 

@@ -1,126 +1,464 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Absensi Siswa</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar Jadwal Absensi</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background: #f4f6f8;
-            padding: 20px;
+            font-family: 'Segoe UI', sans-serif;
+            display: flex;
+            height: 100vh;
+            background: #f3f4f6;
+            color: #111827;
+            overflow-x: hidden;
         }
 
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            background: #fff;
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            color: white;
             padding: 20px;
-            border-radius: 14px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            position: fixed;
+            height: 100%;
+            transition: all 0.4s ease-in-out;
+            z-index: 100;
+            box-shadow: 2px 0 12px rgba(0, 0, 0, 0.15);
         }
 
-        h2 {
+        .sidebar-header h2 {
+            font-size: 1.8rem;
+            text-align: center;
+            margin-bottom: 30px;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        .sidebar-menu {
+            padding-left: 0;
+            margin-left: 0;
+        }
+
+        .sidebar-menu li {
+            list-style: none;
+            margin: 15px;
+            padding-left: 0;
+        }
+
+        .sidebar-menu a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 5px 10px 0px;
+            display: block;
+            border-radius: 10px;
+            transition: all 0.3s ease-in-out;
+            font-weight: 500;
+        }
+
+        .sidebar-menu a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateX(5px);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 260px;
+            padding: 40px;
+            flex: 1;
+            animation: fadeInMain 0.8s ease-in-out;
+        }
+
+        @keyframes fadeInMain {
+            0% {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .main-header h1 {
+            font-size: 2.2rem;
+            color: #1e3a8a;
+            margin-bottom: 25px;
+            animation: slideInLeft 0.7s ease-in-out;
+        }
+
+        @keyframes slideInLeft {
+            0% {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
             margin-bottom: 20px;
-            color: #333;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
+        /* Tables */
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
+            margin-top: 20px;
         }
 
-        th, td {
+        table th, table td {
             padding: 12px;
-            text-align: left;
+            border: 1px solid #e5e7eb;
+            text-align: center;
         }
 
-        th {
-            background-color: #1976d2;
+        table th {
+            background-color: #1e3a8a;
+            color: white;
+            font-weight: 600;
+        }
+
+        table tr:hover {
+            background-color: #f9fafb;
+        }
+
+        .btn-detail {
+            padding: 8px 16px;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-detail:hover {
+            background-color: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        /* Hamburger Menu */
+        .hamburger {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: #1e3a8a;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
             color: white;
         }
 
-        tr:nth-child(even) {
-            background-color: #f1f1f1;
+        .btn-primary:hover {
+            background: #2563eb;
         }
 
-        .action-menu {
-            position: relative;
-            display: inline-block;
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+            margin-left: 10px;
         }
 
-        .menu-button {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 18px;
-            color: #333;
+        .btn-secondary:hover {
+            background: #4b5563;
         }
 
-        .dropdown-menu {
-            display: none;
-            position: absolute;
-            right: 0;
-            background-color: white;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-            border-radius: 8px;
-            overflow: hidden;
-            z-index: 1;
+        /* Footer */
+        footer {
+            text-align: center;
+            color: #6b7280;
+            margin-top: 40px;
+            padding: 20px 0;
         }
 
-        .dropdown-menu a {
-            display: block;
-            padding: 10px 16px;
-            text-decoration: none;
-            color: #333;
-            font-size: 14px;
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 80px 20px 20px;
+            }
+
+            .hamburger {
+                display: block;
+            }
+
+            .overlay.active {
+                display: block;
+            }
+
+            .main-header h1 {
+                font-size: 1.8rem;
+            }
+
+            table {
+                font-size: 14px;
+            }
+
+            table th,
+            table td {
+                padding: 8px;
+            }
         }
 
-        .dropdown-menu a:hover {
-            background-color: #f2f2f2;
-        }
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 80px 15px 15px;
+            }
 
-        .action-menu:hover .dropdown-menu {
-            display: block;
+            .card {
+                padding: 20px;
+            }
+
+            .modal-content {
+                margin: 10% auto;
+                padding: 20px;
+                width: 95%;
+            }
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <h2>Absensi Siswa</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Pertemuan</th>
-                <th>Tanggal</th>
-                <th>Status</th>
-                <th>Aksi</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for pertemuan in pertemuan_list %}
-            <tr>
-                <td>Pertemuan ke-{{ pertemuan.nomor }}</td>
-                <td>{{ pertemuan.tanggal }}</td>
-                <td>{{ pertemuan.status }}</td>
-                <td>
-                    <div class="action-menu">
-                        <button class="menu-button"><i class="fas fa-ellipsis-v"></i></button>
-                        <div class="dropdown-menu">
-                            <a href="{% url 'rumahbelajar:absensi_siswa' siswa.id %}?pertemuan={{ pertemuan.nomor }}">Lihat Detail</a>
-                            <a href="{% url 'rumahbelajar:scan_qr' siswa.id pertemuan.nomor %}">Scan QR</a>
-                        </div>
-                    </div>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="4">Belum ada data pertemuan.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
+    <!-- Hamburger Menu -->
+    <button class="hamburger" onclick="toggleSidebar()">☰</button>
+    <div class="overlay" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>Menu Siswa</h2>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="{% url 'rumahbelajar:dashboard_Siswa' %}">🏠 Beranda</a></li>
+            <li><a href="{% url 'rumahbelajar:akademik_siswa' %}">📚 Akademik</a></li>
+            <li><a href="{% url 'rumahbelajar:absensi_siswa' %}">📝 Presensi</a></li>
+            <li><a href="{% url 'rumahbelajar:riwayat_presensi_siswa' %}">📊 Riwayat Presensi</a></li>
+            <li><a href="{% url 'keuangan:tagihan_spp_siswa' %}">💰 Keuangan</a></li>
+            <li><a href="#" onclick="openChangePasswordModal()">🔐 Ubah Password</a></li>
+            <li><a href="{% url 'rumahbelajar:logout' %}">🚪 Logout</a></li>
+        </ul>
+    </nav>
+
+    <div class="main-content">
+        <div class="main-header">
+            <h1>Daftar Jadwal Presensi</h1>
+        </div>
+
+        <div class="card">
+            {% if jadwal_list %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Mata Pelajaran</th>
+                        <th>Guru</th>
+                        <th>Hari</th>
+                        <th>Jam</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for jadwal in jadwal_list %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ jadwal.mapel.nama }}</td>
+                        <td>{{ jadwal.guru.user.get_full_name }}</td>
+                        <td>{{ jadwal.hari }}</td>
+                        <td>{{ jadwal.jam_mulai }} - {{ jadwal.jam_selesai }}</td>
+                        <td>
+                            <a href="{% url 'rumahbelajar:absensi_detail' jadwal.id %}" class="btn-detail">Lihat Absensi</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p>Tidak ada jadwal mengajar yang ditemukan.</p>
+            {% endif %}
+        </div>
+
+        <footer>
+            <p>&copy; 2025 Sistem Absensi Bimbel | All Rights Reserved</p>
+        </footer>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div id="changePasswordModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeChangePasswordModal()">&times;</span>
+            <h2 style="margin-bottom: 20px; color: #1e3a8a;">Ubah Password</h2>
+            <form id="changePasswordForm" method="post" action="{% url 'rumahbelajar:change_password' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="current_password">Password Saat Ini</label>
+                    <input type="password" id="current_password" name="current_password" required>
+                </div>
+                <div class="form-group">
+                    <label for="new_password">Password Baru</label>
+                    <input type="password" id="new_password" name="new_password" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirm_password">Konfirmasi Password Baru</label>
+                    <input type="password" id="confirm_password" name="confirm_password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Ubah Password</button>
+                <button type="button" class="btn btn-secondary" onclick="closeChangePasswordModal()">Batal</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.querySelector('.overlay');
+        sidebar.classList.toggle('active');
+        overlay.classList.toggle('active');
+    }
+
+    function openChangePasswordModal() {
+        document.getElementById('changePasswordModal').style.display = 'block';
+    }
+
+    function closeChangePasswordModal() {
+        document.getElementById('changePasswordModal').style.display = 'none';
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('changePasswordModal');
+        if (event.target == modal) {
+            closeChangePasswordModal();
+        }
+    }
+
+    // Form validation
+    document.getElementById('changePasswordForm').addEventListener('submit', function(e) {
+        const newPassword = document.getElementById('new_password').value;
+        const confirmPassword = document.getElementById('confirm_password').value;
+        
+        if (newPassword !== confirmPassword) {
+            e.preventDefault();
+            alert('Password baru dan konfirmasi password tidak cocok!');
+            return false;
+        }
+        
+        if (newPassword.length < 8) {
+            e.preventDefault();
+            alert('Password baru harus minimal 8 karakter!');
+            return false;
+        }
+    });
+    </script>
 </body>
 </html>

@@ -3,6 +3,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Orang Tua</title>
     <style>
         * {
@@ -26,6 +27,8 @@
             height: 100%;
             box-shadow: 2px 0 12px rgba(0, 0, 0, 0.15);
             z-index: 100;
+            transition: all 0.4s ease-in-out;
+            overflow-y: auto;
         }
         .sidebar-header {
             text-align: center;
@@ -57,6 +60,7 @@
             margin-left: 260px;
             padding: 40px;
             flex-grow: 1;
+            transition: margin-left 0.4s ease-in-out;
         }
 
         .main-header h1 {
@@ -95,19 +99,186 @@
             font-size: 0.9rem;
             color: #777;
         }
+
+        /* Hamburger Menu */
+        .hamburger {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: #1e3a8a;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 99;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+            margin-left: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 80px 20px 20px;
+            }
+
+            .hamburger {
+                display: block;
+            }
+
+            .overlay.active {
+                display: block;
+            }
+
+            .main-header h1 {
+                font-size: 1.8rem;
+            }
+
+            .dashboard-overview {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 80px 15px 15px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .modal-content {
+                margin: 10% auto;
+                padding: 20px;
+                width: 95%;
+            }
+        }
     </style>
 </head>
 <body>
 
-<div class="sidebar">
+<!-- Hamburger Menu -->
+<button class="hamburger" onclick="toggleSidebar()">☰</button>
+<div class="overlay" onclick="toggleSidebar()"></div>
+
+<div class="sidebar" id="sidebar">
     <div class="sidebar-header">Menu Orang Tua</div>
     <ul class="sidebar-menu">
-        <li><a href="{% url 'rumahbelajar:home' %}">🏠 Beranda</a></li>
-        <li><a href="{% url 'rumahbelajar:akademik_siswa' %}">👨‍👧 Akademik Anak</a></li>  
-        <li><a href="#">👨‍👧 Presensi Anak</a></li>  
-        <li><a href="#"><span>💳</span> Tagihan</a></li>
-        <li><a href="#"><span>📞</span> Kontak</a></li>
-        <li><a href="#"><span>🔒</span> Logout</a></li>
+        <li><a href="{% url 'rumahbelajar:dashboard_OrangTua' %}">🏠 Beranda</a></li>
+        <li><a href="{% url 'rumahbelajar:akademik_anak' %}">👨‍👧 Akademik Anak</a></li>  
+        <li><a href="{% url 'rumahbelajar:pilih_anak' %}">👨‍👧 Presensi Anak</a></li>  
+        <li><a href="{% url 'keuangan:tagihan_spp_orangtua' %}"><span>💳</span> Tagihan</a></li>
+        <li><a href="#" onclick="openChangePasswordModal()">🔐 Ubah Password</a></li>
+        <li><a href="{% url 'rumahbelajar:login' %}"><span>🔒</span> Logout</a></li> 
     </ul>
 </div>
 
@@ -118,16 +289,16 @@
     </div>
 
     <div class="dashboard-overview">
-        <div class="card clickable" onclick="location.href='{% url 'rumahbelajar:akademik_siswa' %}'">
+        <div class="card clickable" onclick="location.href='{% url 'rumahbelajar:akademik_anak' %}'">
             <h3>👧 Anak-Anak Anda</h3>
         </div>
 
-        <div class="card clickable" onclick="location.href='#'">
-            <h3>💳 Tagihan Terbaru</h3>
+        <div class="card clickable" onclick="location.href='{% url 'rumahbelajar:pilih_anak' %}'">
+            <h3>👧 Presensi Anak</h3>
         </div>
 
-        <div class="card clickable" onclick="location.href='#'">
-            <h3>👨‍💼 Informasi Akun</h3>
+        <div class="card clickable" onclick="location.href='{% url 'keuangan:tagihan_spp_orangtua' %}'">
+            <h3>💳 Tagihan Terbaru</h3>
         </div>
     </div>
 
@@ -135,6 +306,74 @@
         © 2025 Sistem Absensi Bimbel | All Rights Reserved
     </footer>
 </div>
+
+<!-- Change Password Modal -->
+<div id="changePasswordModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeChangePasswordModal()">&times;</span>
+        <h2 style="margin-bottom: 20px; color: #1e3a8a;">Ubah Password</h2>
+        <form id="changePasswordForm" method="post" action="{% url 'rumahbelajar:change_password' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="current_password">Password Saat Ini</label>
+                <input type="password" id="current_password" name="current_password" required>
+            </div>
+            <div class="form-group">
+                <label for="new_password">Password Baru</label>
+                <input type="password" id="new_password" name="new_password" required>
+            </div>
+            <div class="form-group">
+                <label for="confirm_password">Konfirmasi Password Baru</label>
+                <input type="password" id="confirm_password" name="confirm_password" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Ubah Password</button>
+            <button type="button" class="btn btn-secondary" onclick="closeChangePasswordModal()">Batal</button>
+        </form>
+    </div>
+</div>
+
+<script>
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.querySelector('.overlay');
+    sidebar.classList.toggle('active');
+    overlay.classList.toggle('active');
+}
+
+function openChangePasswordModal() {
+    document.getElementById('changePasswordModal').style.display = 'block';
+}
+
+function closeChangePasswordModal() {
+    document.getElementById('changePasswordModal').style.display = 'none';
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('changePasswordModal');
+    if (event.target == modal) {
+        closeChangePasswordModal();
+    }
+}
+
+// Form validation
+document.getElementById('changePasswordForm').addEventListener('submit', function(e) {
+    const newPassword = document.getElementById('new_password').value;
+    const confirmPassword = document.getElementById('confirm_password').value;
+    
+    if (newPassword !== confirmPassword) {
+        e.preventDefault();
+        alert('Password baru dan konfirmasi password tidak cocok!');
+        return false;
+    }
+    
+    if (newPassword.length < 8) {
+        e.preventDefault();
+        alert('Password baru harus minimal 8 karakter!');
+        return false;
+    }
+});
+</script>
 
 </body>
 </html>

@@ -1,0 +1,589 @@
+﻿{% load dict_extras %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Detail Presensi - {{ jadwal.mapel.nama }} | Tahun {{ year }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            display: flex;
+            height: 100vh;
+            background: #f3f4f6;
+            color: #111827;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            color: white;
+            padding: 20px;
+            position: fixed;
+            height: 100%;
+            transition: all 0.4s ease-in-out;
+            z-index: 100;
+            box-shadow: 2px 0 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.8rem;
+            text-align: center;
+            margin-bottom: 30px;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        .sidebar-menu {
+            padding-left: 0;
+            margin-left: 0;
+        }
+
+        .sidebar-menu li {
+            list-style: none;
+            margin: 15px;
+            padding-left: 0;
+        }
+
+        .sidebar-menu a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 5px 10px 0px;
+            display: block;
+            border-radius: 10px;
+            transition: all 0.3s ease-in-out;
+            font-weight: 500;
+        }
+
+        .sidebar-menu a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateX(5px);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 260px;
+            padding: 40px;
+            flex: 1;
+            animation: fadeInMain 0.8s ease-in-out;
+        }
+
+        @keyframes fadeInMain {
+            0% {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .main-header h1 {
+            font-size: 2.2rem;
+            color: #1e3a8a;
+            margin-bottom: 25px;
+            animation: slideInLeft 0.7s ease-in-out;
+        }
+
+        @keyframes slideInLeft {
+            0% {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+        }
+
+        .title {
+            background-color: #1e3a8a;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px 10px 0 0;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .subtitle {
+            margin: 10px 0;
+            font-weight: bold;
+            font-size: 18px;
+            color: #1e3a8a;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .info-block {
+            width: 45%;
+        }
+
+        .info-block ul {
+            padding-left: 18px;
+        }
+
+        .status-hadir {
+            color: #16a34a;
+            font-weight: bold;
+        }
+
+        .status-absen, .status-belum {
+            color: #dc2626;
+            font-weight: bold;
+        }
+
+        .btn-scan {
+            width: 100%;
+            padding: 12px;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-scan:hover {
+            background-color: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        .messages {
+            margin: 10px 0;
+        }
+
+        .messages .error {
+            color: #dc2626;
+            background: #fee2e2;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .messages .success {
+            color: #16a34a;
+            background: #dcfce7;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        #qr-reader {
+            width: 100%;
+            max-width: 400px;
+            margin: 20px auto;
+            display: none;
+        }
+
+        /* Hamburger Menu */
+        .hamburger {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: #1e3a8a;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+            margin-left: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            color: #6b7280;
+            margin-top: 40px;
+            padding: 20px 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 80px 20px 20px;
+            }
+
+            .hamburger {
+                display: block;
+            }
+
+            .overlay.active {
+                display: block;
+            }
+
+            .main-header h1 {
+                font-size: 1.8rem;
+            }
+
+            .info-row {
+                flex-direction: column;
+            }
+
+            .info-block {
+                width: 100%;
+                margin-bottom: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 80px 15px 15px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .modal-content {
+                margin: 10% auto;
+                padding: 20px;
+                width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hamburger Menu -->
+    <button class="hamburger" onclick="toggleSidebar()">☰</button>
+    <div class="overlay" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>Menu Siswa</h2>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="{% url 'rumahbelajar:dashboard_Siswa' %}">🏠 Beranda</a></li>
+            <li><a href="{% url 'rumahbelajar:akademik_siswa' %}">📚 Akademik</a></li>
+            <li><a href="{% url 'rumahbelajar:absensi_siswa' %}">📝 Presensi</a></li>
+            <li><a href="{% url 'rumahbelajar:riwayat_presensi_siswa' %}">📊 Riwayat Presensi</a></li>
+            <li><a href="{% url 'keuangan:tagihan_spp_siswa' %}">💰 Keuangan</a></li>
+            <li><a href="#" onclick="openChangePasswordModal()">🔐 Ubah Password</a></li>
+            <li><a href="{% url 'rumahbelajar:logout' %}">🚪 Logout</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <header class="main-header">
+            <h1>Detail Presensi</h1>
+            <p>Presensi untuk mata pelajaran {{ jadwal.mapel.nama }}</p>
+        </header>
+
+        <div class="container">
+            <div class="title">RUMAHBELAJAR - {{ jadwal.mapel.nama|upper }}</div>
+
+            <p class="subtitle">Tahun: {{ year }}</p>
+
+            <!-- Pesan sistem -->
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+
+            <!-- Tempat untuk QR Scanner -->
+            <div id="qr-reader"></div>
+
+            {% for pertemuan_num in total_pertemuan %}
+            <div class="card">
+                <div class="info-row">
+                    <div class="info-block">
+                        <strong>Jadwal Les</strong>
+                        <ul>
+                            <li>Pertemuan Ke - {{ pertemuan_num }}</li>
+                        </ul>
+                    </div>
+                    <div class="info-block">
+                        <strong>Status Presensi</strong>
+                        <ul>
+                            {% if status_pertemuan|default:""|has_key:pertemuan_num %}
+                                {% with status_pertemuan|get_item:pertemuan_num as status %}
+                                    {% if status == 'Hadir' %}
+                                        <li class="status-hadir">Hadir</li>
+                                    {% else %}
+                                        <li class="status-absen">{{ status }}</li>
+                                    {% endif %}
+                                    <li>{{ presensi_waktu|get_item:pertemuan_num|date:"d M Y" }}</li>
+                                    <li>{{ presensi_waktu|get_item:pertemuan_num|date:"H:i" }} WIB</li>
+                                {% endwith %}
+                            {% else %}
+                                <li class="status-belum">Belum Absen</li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Form Presensi -->
+                <form method="post" style="margin-top: 20px;">
+                    {% csrf_token %}
+                    <input type="hidden" name="pertemuan" value="{{ pertemuan_num }}" />
+                    <input type="hidden" name="kode_qr" id="kode_qr_{{ pertemuan_num }}" value="" />
+
+                    {% if pertemuan_num %}
+                        <button type="button" class="btn-scan" onclick="startScan({{ pertemuan_num }})">SCAN QR</button>
+                    {% endif %}
+                    <button type="submit" style="display:none;" id="submit_btn_{{ pertemuan_num }}">Kirim</button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+
+        <footer>
+            <p>&copy; 2025 Sistem Absensi Bimbel | All Rights Reserved</p>
+        </footer>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div id="changePasswordModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeChangePasswordModal()">&times;</span>
+            <h2 style="margin-bottom: 20px; color: #1e3a8a;">Ubah Password</h2>
+            <form id="changePasswordForm" method="post" action="{% url 'rumahbelajar:change_password' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="current_password">Password Saat Ini</label>
+                    <input type="password" id="current_password" name="current_password" required>
+                </div>
+                <div class="form-group">
+                    <label for="new_password">Password Baru</label>
+                    <input type="password" id="new_password" name="new_password" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirm_password">Konfirmasi Password Baru</label>
+                    <input type="password" id="confirm_password" name="confirm_password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Ubah Password</button>
+                <button type="button" class="btn btn-secondary" onclick="closeChangePasswordModal()">Batal</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Script HTML5 QR Code -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script>
+        let html5QrCode;
+        let currentPertemuan = null;
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.overlay');
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        function openChangePasswordModal() {
+            document.getElementById('changePasswordModal').style.display = 'block';
+        }
+
+        function closeChangePasswordModal() {
+            document.getElementById('changePasswordModal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('changePasswordModal');
+            if (event.target == modal) {
+                closeChangePasswordModal();
+            }
+        }
+
+        // Form validation
+        document.getElementById('changePasswordForm').addEventListener('submit', function(e) {
+            const newPassword = document.getElementById('new_password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+            
+            if (newPassword !== confirmPassword) {
+                e.preventDefault();
+                alert('Password baru dan konfirmasi password tidak cocok!');
+                return false;
+            }
+            
+            if (newPassword.length < 8) {
+                e.preventDefault();
+                alert('Password baru harus minimal 8 karakter!');
+                return false;
+            }
+        });
+
+        function startScan(pertemuan) {
+            currentPertemuan = pertemuan;
+            const qrReader = document.getElementById("qr-reader");
+            qrReader.style.display = "block";
+
+            if (html5QrCode) {
+                html5QrCode.clear().then(() => {
+                    scanNow();
+                }).catch((err) => {
+                    // Handle clear error
+                    scanNow();
+                });
+            } else {
+                html5QrCode = new Html5Qrcode("qr-reader");
+                scanNow();
+            }
+        }
+
+        function scanNow() {
+            html5QrCode.start(
+                { facingMode: "environment" }, // Gunakan kamera belakang
+                { fps: 10, qrbox: 250 },
+                (decodedText, decodedResult) => {
+                    // Jika berhasil scan
+                    document.getElementById("kode_qr_" + currentPertemuan).value = decodedText;
+                    document.getElementById("submit_btn_" + currentPertemuan).click();
+
+                    html5QrCode.stop().then(() => {
+                        document.getElementById("qr-reader").style.display = "none";
+                        document.getElementById("qr-reader").innerHTML = "";
+                    }).catch((err) => {
+                        alert("Gagal menghentikan kamera: " + err);
+                    });
+                },
+                (errorMessage) => {
+                    // Gagal membaca QR, bisa diabaikan
+                }
+            ).catch((err) => {
+                alert("Tidak bisa mengakses kamera: " + err);
+            });
+        }
+    </script>
+</body>
+</html>
